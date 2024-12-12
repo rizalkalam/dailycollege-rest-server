@@ -27,23 +27,4 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes
 app.use('/auth', authRoutes);
 
-// app.get(
-//     '/auth/google',
-//     passport.authenticate('google', { scope: ['profile', 'email'] })
-// );
-//
-// app.get(
-//     '/auth/google/callback',
-//     passport.authenticate('google', { session: false }), // Menggunakan session false jika tidak ingin menyimpan session
-//     (req, res) => {
-//         // Setelah berhasil login atau mendaftar, kita akan mengirimkan JWT dalam response
-//         const { user, token } = req.user;
-//         res.json({
-//             message: 'Login or Registration successful',
-//             user: user,
-//             token: token,  // Kirimkan token di sini
-//         });
-//     }
-// );
-
 module.exports = app;
