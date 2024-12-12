@@ -10,8 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 script {
-                    // Clone repository dari GitHub
-                    git url: "${GIT_REPO}", branch: 'main'  // Sesuaikan dengan nama branch yang digunakan
+                    git url: "${GIT_REPO}", branch: 'main'  // Ganti dengan nama branch yang digunakan
                 }
             }
         }
@@ -21,15 +20,6 @@ pipeline {
                 script {
                     // Install dependensi menggunakan pnpm
                     sh 'pnpm install'
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                script {
-                    // (Opsional) Jika ada build process seperti transpile atau bundling, jalankan di sini
-                    sh 'pnpm run build'  // Sesuaikan dengan skrip build di package.json
                 }
             }
         }
@@ -68,7 +58,6 @@ pipeline {
 
     post {
         always {
-            // Membersihkan workspace setelah pipeline selesai
             cleanWs()
         }
     }
