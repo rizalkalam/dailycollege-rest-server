@@ -30,7 +30,7 @@ pipeline {
                 script {
                     // Pastikan direktori deploy ada dan memiliki izin yang benar
                     sh 'sudo mkdir -p $DEPLOY_DIR'
-                    sh 'sudo chown -R jenkins:jenkins $DEPLOY_DIR'
+                    sh 'sudo chown -R rizalkalam:rizalkalam $DEPLOY_DIR'
                     sh 'sudo chmod -R 755 $DEPLOY_DIR'
                 }
             }
