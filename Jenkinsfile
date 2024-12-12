@@ -30,7 +30,7 @@ pipeline {
                 script {
                     // Pastikan direktori deploy ada dan memiliki izin yang benar
                     sh 'sudo mkdir -p $DEPLOY_DIR'
-                    sh 'sudo chown -R rizalkalam:rizalkalam $DEPLOY_DIR'
+                    sh 'sudo chown -R jenkins:jenkins $DEPLOY_DIR'
                     sh 'sudo chmod -R 755 $DEPLOY_DIR'
                 }
             }
@@ -55,8 +55,9 @@ pipeline {
                     sh 'cd $DEPLOY_DIR && pm2 start src/server.js --name "express-app"'
                     
                     // (Opsional) Setel PM2 agar aplikasi berjalan otomatis saat server restart
-                    sh 'pm2 startup'
-                    sh 'pm2 save'
+                    // Perintah ini seharusnya dijalankan secara manual di server
+                    // sh 'pm2 startup' // Dihapus atau dibiarkan tanpa dijalankan oleh Jenkins
+                    // sh 'pm2 save' // Ini juga bisa dihapus jika sudah dijalankan secara manual
                 }
             }
         }
