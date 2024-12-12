@@ -4,6 +4,7 @@ pipeline {
     environment {
         DEPLOY_DIR = '/var/www/dailycollege-express-app'  // Ganti dengan direktori yang sesuai di server Anda
         GIT_REPO = 'https://github.com/rizalkalam/dailycode-rest-server.git'  // Ganti dengan URL GitHub repo Anda
+        PATH = "/usr/local/bin:$PATH"  // Tambahkan path global npm di Jenkins
     }
 
     stages {
@@ -29,6 +30,9 @@ pipeline {
                 script {
                     // Stop aplikasi lama jika ada
                     sh 'pm2 stop express-app || true'
+
+                    // Pastikan direktori deploy ada
+                    sh 'mkdir -p $DEPLOY_DIR'
 
                     // Salin semua file ke direktori deploy
                     sh 'cp -r * $DEPLOY_DIR/'
