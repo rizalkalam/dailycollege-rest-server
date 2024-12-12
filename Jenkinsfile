@@ -35,13 +35,13 @@ pipeline {
                     sh 'sudo mkdir -p $DEPLOY_DIR'
 
                     // Salin semua file ke direktori deploy
-                    sh 'cp -r * $DEPLOY_DIR/'
+                    sh 'sudo cp -r * $DEPLOY_DIR/'
 
                     // Install dependensi di server jika ada yang belum terinstal
                     sh 'cd $DEPLOY_DIR && pnpm install'
 
                     // Mulai aplikasi dengan PM2
-                    sh 'cd $DEPLOY_DIR && pm2 start server.js --name "express-app"'
+                     sh 'cd $DEPLOY_DIR && pm2 start src/server.js --name "express-app"'
                     
                     // (Opsional) Setel PM2 agar aplikasi berjalan otomatis saat server restart
                     sh 'pm2 startup'
@@ -54,7 +54,7 @@ pipeline {
             steps {
                 script {
                     // Hapus file build sementara atau file lain yang tidak diperlukan
-                    sh 'rm -rf $DEPLOY_DIR/tmp/*'
+                    sh 'sudo rm -rf $DEPLOY_DIR/tmp/*'
                 }
             }
         }
