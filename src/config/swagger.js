@@ -10,7 +10,12 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:3000', // Base URL API
+            url: 'http://localhost:3000', // Base URL API untuk development
+            description: 'Localeee Server', // Deskripsi server development
+        },
+        {
+            url: 'http://103.37.124.208:3000', // Base URL API untuk staging
+            description: 'Devdevdev Server', // Deskripsi server staging
         },
     ],
     components: {
