@@ -32,7 +32,7 @@ pipeline {
                     sh 'pm2 stop express-app || true'
 
                     // Pastikan direktori deploy ada
-                    sh 'mkdir -p $DEPLOY_DIR'
+                    sh 'sudo mkdir -p $DEPLOY_DIR'
 
                     // Salin semua file ke direktori deploy
                     sh 'cp -r * $DEPLOY_DIR/'
