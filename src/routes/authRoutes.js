@@ -119,7 +119,7 @@ router.post('/verify', verifyAndRegisterUser);
  *             properties:
  *               email:
  *                 type: string
- *                 example: alice@example.com
+ *                 example: adesetiawan@gmail.com
  *               password:
  *                 type: string
  *                 example: password123
