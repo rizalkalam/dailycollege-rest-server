@@ -1,6 +1,6 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./config/swagger');
+const swaggerDocument = require('./config/swagger');
 const authRoutes = require('./routes/authRoutes');
 const forgotPassword = require('./routes/forgotPasswordRoutes')
 const scheduleRoutes = require('./routes/scheduleRoutes')
@@ -9,12 +9,19 @@ const dotenv = require('dotenv');
 const passport = require('./config/passport');
 const sessionConfig = require('./config/session');
 const cookieParser = require('cookie-parser');
+const cors = require('cors'); // Mengimpor cors
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 
-
 dotenv.config();
 const app = express();
+
+const corsOptions = {
+    origin: 'http://localhost:3000',  // Jika Swagger UI di-hosting di port 3001
+    allowedHeaders: ['Authorization', 'Content-Type'],  // Pastikan Authorization ada di sini
+    credentials: true,  // Jika perlu
+};
+app.use(cors(corsOptions)); // Jika menggunakan CORS
 
 // Middleware untuk body parser (untuk menerima data POST)
 app.use(express.urlencoded({ extended: true }));
@@ -29,7 +36,10 @@ app.use(passport.session());
 
 
 // Swagger UI
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    explorer: true,  // Untuk menampilkan Explorer jika diperlukan
+}));
+
 
 // Routes
 app.use('/auth', authRoutes);
