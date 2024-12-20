@@ -10,12 +10,8 @@ async function seedSchedules() {
 
         console.log('Seeding shcedules...');
       // Menemukan pengguna pertama, untuk contoh ini kita gunakan user dengan email "kalam@example.com"
-      const user = await User.findOne({ email: 'nugasyukmyid@gmail.com' });
-  
-      if (!user) {
-        console.log('User not found. Please create a user first.');
-        return;
-      }
+      const user_1 = await User.findOne({ email: 'nugasyukmyid@gmail.com' });
+      const user_2 = await User.findOne({ email: 'adesetiawan@gmail.com' });
 
       // Hapus semua data pengguna (opsional)
       await Schedule.deleteMany();
@@ -23,7 +19,7 @@ async function seedSchedules() {
       // Data shcedules sampel
       const shcedules = [
         {
-          user_id: user._id,
+          user_id: user_2._id,
           title: 'Meeting with Team',
           start_date_time: new Date('2024-12-22T10:00:00Z'),
           end_date_time: new Date('2024-12-22T12:00:00Z'),
@@ -31,7 +27,7 @@ async function seedSchedules() {
           reminder: new Date('2024-12-22T09:30:00Z'),
         },
         {
-          user_id: user._id,
+          user_id: user_1._id,
           title: 'Doctor Appointment',
           start_date_time: new Date('2024-12-23T14:00:00Z'),
           end_date_time: new Date('2024-12-23T14:30:00Z'),
@@ -39,7 +35,7 @@ async function seedSchedules() {
           reminder: new Date('2024-12-23T13:30:00Z'),
         },
         {
-          user_id: user._id,
+          user_id: user_2._id,
           title: 'Conference Presentation',
           start_date_time: new Date('2024-12-25T09:00:00Z'),
           end_date_time: new Date('2024-12-25T11:00:00Z'),

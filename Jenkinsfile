@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DEPLOY_DIR = '/var/www/dailycollege-express-app'
-        GIT_REPO = 'https://github.com/rizalkalam/dailycode-rest-server.git'  // Ganti dengan URL GitHub repo Anda
+        GIT_REPO = 'https://github.com/rizalkalam/dailycollege-rest-server.git'  // Ganti dengan URL GitHub repo Anda
         PATH = "/usr/local/bin:$PATH"  // Tambahkan path global npm di Jenkins
     }
 
