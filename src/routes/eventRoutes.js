@@ -42,7 +42,7 @@ const authenticate = require('../middlewares/authenticate');
  *                   user_id:
  *                     type: string
  *                     description: The user ID of the event owner
- *       200:
+ *       204:
  *         description: No events found for this user.
  *         content:
  *           application/json:
@@ -221,8 +221,8 @@ router.get('/:id', authenticate, getEventById);
  *                   type: string
  *                   description: Additional notes for the event
  *                 reminder:
- *                   type: string
- *                   description: Reminder time for the event
+ *                   type: integer
+ *                   description: Reminder time in minutes before the event
  *                 user_id:
  *                   type: string
  *                   description: The user ID of the event owner
@@ -344,7 +344,7 @@ router.post('/', authenticate, createEvent);
  *                       type: string
  *                       description: Additional notes for the event
  *                     reminder:
- *                       type: string
+ *                       type: integer
  *                       description: Reminder time for the event
  *                     user_id:
  *                       type: string
@@ -388,7 +388,7 @@ router.post('/', authenticate, createEvent);
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.post('/:id', authenticate, updateEvent);
+router.put('/:id', authenticate, updateEvent);
 /**
  * @swagger
  * /events/{id}:
