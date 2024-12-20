@@ -1,20 +1,20 @@
 const express = require('express');
-const { getEvents, getEventById, createEvent, updateEvent, deleteEvent } = require('../controllers/eventController');
+const { getSchedules, getScheduleById, createSchedule, updateSchedule, deleteSchedule } = require('../controllers/scheduleController');
 const router = express.Router();
 const authenticate = require('../middlewares/authenticate');
 
 /**
  * @swagger
- * /events:
+ * /schedules:
  *   get:
- *     summary: Get all events by user ID
- *     description: Get a list of events that belong to the authenticated user.
- *     tags: [Events]
+ *     summary: Get all schedules by user ID
+ *     description: Get a list of schedules that belong to the authenticated user.
+ *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: A list of events for the user
+ *         description: A list of schedules for the user
  *         content:
  *           application/json:
  *             schema:
@@ -24,26 +24,26 @@ const authenticate = require('../middlewares/authenticate');
  *                 properties:
  *                   _id:
  *                     type: string
- *                     description: The event's unique identifier
+ *                     description: The schedule's unique identifier
  *                   title:
  *                     type: string
- *                     description: The event's title
+ *                     description: The schedule's title
  *                   start_date_time:
  *                     type: string
  *                     format: date-time
- *                     description: The start date and time of the event
+ *                     description: The start date and time of the schedule
  *                   end_date_time:
  *                     type: string
  *                     format: date-time
- *                     description: The end date and time of the event
+ *                     description: The end date and time of the schedule
  *                   reminder:
  *                     type: string
- *                     description: The reminder for the event
+ *                     description: The reminder for the schedule
  *                   user_id:
  *                     type: string
- *                     description: The user ID of the event owner
+ *                     description: The user ID of the schedule owner
  *       204:
- *         description: No events found for this user.
+ *         description: No schedules found for this user.
  *         content:
  *           application/json:
  *             schema:
@@ -51,8 +51,8 @@ const authenticate = require('../middlewares/authenticate');
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "No events found for this user."
- *                 events:
+ *                   example: "No schedules found for this user."
+ *                 schedules:
  *                   type: array
  *                   items:
  *                     type: object
@@ -72,18 +72,18 @@ const authenticate = require('../middlewares/authenticate');
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.get('/', authenticate, getEvents);
+router.get('/', authenticate, getSchedules);
 /**
  * @swagger
- * /events/{id}:
+ * /schedules/{id}:
  *   get:
- *     summary: Get a specific event by user ID and event ID
- *     description: Get the details of an event for the authenticated user by event ID.
- *     tags: [Events]
+ *     summary: Get a specific schedule by user ID and schedule ID
+ *     description: Get the details of a schedule for the authenticated user by schedule ID.
+ *     tags: [Schedules]
  *     parameters:
  *       - name: id
  *         in: path
- *         description: The unique ID of the event.
+ *         description: The unique ID of the schedule.
  *         required: true
  *         schema:
  *           type: string
@@ -91,7 +91,7 @@ router.get('/', authenticate, getEvents);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Event found and details returned
+ *         description: Schedule found and details returned
  *         content:
  *           application/json:
  *             schema:
@@ -99,26 +99,26 @@ router.get('/', authenticate, getEvents);
  *               properties:
  *                 _id:
  *                   type: string
- *                   description: The unique identifier of the event
+ *                   description: The unique identifier of the schedule
  *                 title:
  *                   type: string
- *                   description: The title of the event
+ *                   description: The title of the schedule
  *                 start_date_time:
  *                   type: string
  *                   format: date-time
- *                   description: The start date and time of the event
+ *                   description: The start date and time of the schedule
  *                 end_date_time:
  *                   type: string
  *                   format: date-time
- *                   description: The end date and time of the event
+ *                   description: The end date and time of the schedule
  *                 reminder:
  *                   type: string
- *                   description: The reminder for the event
+ *                   description: The reminder for the schedule
  *                 user_id:
  *                   type: string
- *                   description: The user ID of the event owner
+ *                   description: The user ID of the schedule owner
  *       404:
- *         description: Event not found or the user does not have permission to view it
+ *         description: Schedule not found or the user does not have permission to view it
  *         content:
  *           application/json:
  *             schema:
@@ -126,7 +126,7 @@ router.get('/', authenticate, getEvents);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Event not found or you do not have permission to view it."
+ *                   example: "Schedule not found or you do not have permission to view it."
  *       500:
  *         description: Server error
  *         content:
@@ -146,14 +146,14 @@ router.get('/', authenticate, getEvents);
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.get('/:id', authenticate, getEventById);
+router.get('/:id', authenticate, getScheduleById);
 /**
  * @swagger
- * /events:
+ * /schedules:
  *   post:
- *     summary: Create a new event for the authenticated user
- *     description: This endpoint allows the authenticated user to create a new event by providing necessary details.
- *     tags: [Events]
+ *     summary: Create a new schedule for the authenticated user
+ *     description: This endpoint allows the authenticated user to create a new schedule by providing necessary details.
+ *     tags: [Schedules]
  *     requestBody:
  *       required: true
  *       content:
@@ -163,41 +163,41 @@ router.get('/:id', authenticate, getEventById);
  *             properties:
  *               title:
  *                 type: string
- *                 description: The title of the event.
+ *                 description: The title of the schedule.
  *                 example: "Meeting with team"
  *               start_date:
  *                 type: string
  *                 format: date
- *                 description: The start date of the event.
+ *                 description: The start date of the schedule.
  *                 example: "2024-12-22"
  *               start_time:
  *                 type: string
  *                 format: time
- *                 description: The start time of the event.
+ *                 description: The start time of the schedule.
  *                 example: "10:00:00"
  *               end_date:
  *                 type: string
  *                 format: date
- *                 description: The end date of the event.
+ *                 description: The end date of the schedule.
  *                 example: "2024-12-22"
  *               end_time:
  *                 type: string
  *                 format: time
- *                 description: The end time of the event.
+ *                 description: The end time of the schedule.
  *                 example: "12:00:00"
  *               notes:
  *                 type: string
- *                 description: Additional notes or description for the event.
+ *                 description: Additional notes or description for the schedule.
  *                 example: "Discussing project milestones"
  *               reminder:
  *                 type: integer
- *                 description: The reminder time in minutes before the event.
+ *                 description: The reminder time in minutes before the schedule.
  *                 example: 30
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       201:
- *         description: Event successfully created
+ *         description: Schedule successfully created
  *         content:
  *           application/json:
  *             schema:
@@ -205,27 +205,27 @@ router.get('/:id', authenticate, getEventById);
  *               properties:
  *                 _id:
  *                   type: string
- *                   description: The unique identifier of the event
+ *                   description: The unique identifier of the schedule
  *                 title:
  *                   type: string
- *                   description: The title of the event
+ *                   description: The title of the schedule
  *                 start_date_time:
  *                   type: string
  *                   format: date-time
- *                   description: The start date and time of the event
+ *                   description: The start date and time of the schedule
  *                 end_date_time:
  *                   type: string
  *                   format: date-time
- *                   description: The end date and time of the event
+ *                   description: The end date and time of the schedule
  *                 notes:
  *                   type: string
- *                   description: Additional notes for the event
+ *                   description: Additional notes for the schedule
  *                 reminder:
  *                   type: integer
- *                   description: Reminder time in minutes before the event
+ *                   description: Reminder time in minutes before the schedule
  *                 user_id:
  *                   type: string
- *                   description: The user ID of the event owner
+ *                   description: The user ID of the schedule owner
  *       400:
  *         description: Bad Request, required fields are missing or invalid
  *         content:
@@ -255,19 +255,19 @@ router.get('/:id', authenticate, getEventById);
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.post('/', authenticate, createEvent);
+router.post('/', authenticate, createSchedule);
 /**
  * @swagger
- * /events/{id}:
+ * /schedules/{id}:
  *   put:
- *     summary: Update an existing event for the authenticated user
- *     description: This endpoint allows the authenticated user to update the details of an existing event by providing the event ID in the URL and new event data in the request body.
- *     tags: [Events]
+ *     summary: Update an existing schedule for the authenticated user
+ *     description: This endpoint allows the authenticated user to update the details of an existing schedule by providing the schedule ID in the URL and new schedule data in the request body.
+ *     tags: [Schedules]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the event to update.
+ *         description: The ID of the schedule to update.
  *         schema:
  *           type: string
  *           example: "60c72b2f9e8a2b001f8c0b65"
@@ -280,41 +280,41 @@ router.post('/', authenticate, createEvent);
  *             properties:
  *               title:
  *                 type: string
- *                 description: The title of the event.
+ *                 description: The title of the schedule.
  *                 example: "Meeting with the design team"
  *               start_date:
  *                 type: string
  *                 format: date
- *                 description: The start date of the event.
+ *                 description: The start date of the schedule.
  *                 example: "2024-12-22"
  *               start_time:
  *                 type: string
  *                 format: time
- *                 description: The start time of the event.
+ *                 description: The start time of the schedule.
  *                 example: "10:00:00"
  *               end_date:
  *                 type: string
  *                 format: date
- *                 description: The end date of the event.
+ *                 description: The end date of the schedule.
  *                 example: "2024-12-22"
  *               end_time:
  *                 type: string
  *                 format: time
- *                 description: The end time of the event.
+ *                 description: The end time of the schedule.
  *                 example: "12:00:00"
  *               notes:
  *                 type: string
- *                 description: Additional notes or description for the event.
+ *                 description: Additional notes or description for the schedule.
  *                 example: "Discussing the new design concepts"
  *               reminder:
  *                 type: integer
- *                 description: The reminder time in minutes before the event.
+ *                 description: The reminder time in minutes before the schedule.
  *                 example: 30
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Event successfully updated
+ *         description: Schedule successfully updated
  *         content:
  *           application/json:
  *             schema:
@@ -322,33 +322,33 @@ router.post('/', authenticate, createEvent);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Event updated successfully"
- *                 event:
+ *                   example: "Schedule updated successfully"
+ *                 schedule:
  *                   type: object
  *                   properties:
  *                     _id:
  *                       type: string
- *                       description: The unique identifier of the event
+ *                       description: The unique identifier of the schedule
  *                     title:
  *                       type: string
- *                       description: The title of the event
+ *                       description: The title of the schedule
  *                     start_date_time:
  *                       type: string
  *                       format: date-time
- *                       description: The start date and time of the event
+ *                       description: The start date and time of the schedule
  *                     end_date_time:
  *                       type: string
  *                       format: date-time
- *                       description: The end date and time of the event
+ *                       description: The end date and time of the schedule
  *                     notes:
  *                       type: string
- *                       description: Additional notes for the event
+ *                       description: Additional notes for the schedule
  *                     reminder:
  *                       type: integer
- *                       description: Reminder time for the event
+ *                       description: Reminder time for the schedule
  *                     user_id:
  *                       type: string
- *                       description: The user ID of the event owner
+ *                       description: The user ID of the schedule owner
  *       400:
  *         description: Bad Request, invalid data or missing required fields
  *         content:
@@ -360,7 +360,7 @@ router.post('/', authenticate, createEvent);
  *                   type: string
  *                   example: "Title, start date, start time, end date, and end time are required."
  *       404:
- *         description: Event not found or the user is not authorized to update this event
+ *         description: Schedule not found or the user is not authorized to update this schedule
  *         content:
  *           application/json:
  *             schema:
@@ -368,7 +368,7 @@ router.post('/', authenticate, createEvent);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Event not found or you are not authorized to update this event."
+ *                   example: "Schedule not found or you are not authorized to update this schedule."
  *       500:
  *         description: Server error
  *         content:
@@ -388,19 +388,19 @@ router.post('/', authenticate, createEvent);
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.put('/:id', authenticate, updateEvent);
+router.put('/:id', authenticate, updateSchedule);
 /**
  * @swagger
- * /events/{id}:
+ * /schedules/{id}:
  *   delete:
- *     summary: Delete an event for the authenticated user
- *     description: This endpoint allows the authenticated user to delete an event by providing the event ID in the URL.
- *     tags: [Events]
+ *     summary: Delete a schedule for the authenticated user
+ *     description: This endpoint allows the authenticated user to delete a schedule by providing the schedule ID in the URL.
+ *     tags: [Schedules]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the event to delete.
+ *         description: The ID of the schedule to delete.
  *         schema:
  *           type: string
  *           example: "60c72b2f9e8a2b001f8c0b65"
@@ -408,7 +408,7 @@ router.put('/:id', authenticate, updateEvent);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Event successfully deleted
+ *         description: Schedule successfully deleted
  *         content:
  *           application/json:
  *             schema:
@@ -416,9 +416,9 @@ router.put('/:id', authenticate, updateEvent);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Event deleted successfully"
+ *                   example: "Schedule deleted successfully"
  *       404:
- *         description: Event not found or the user is not authorized to delete this event
+ *         description: Schedule not found or the user is not authorized to delete this schedule
  *         content:
  *           application/json:
  *             schema:
@@ -426,7 +426,7 @@ router.put('/:id', authenticate, updateEvent);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Event not found or you are not authorized to delete this event."
+ *                   example: "Schedule not found or you are not authorized to delete this schedule."
  *       500:
  *         description: Server error
  *         content:
@@ -446,6 +446,6 @@ router.put('/:id', authenticate, updateEvent);
  *         scheme: bearer
  *         bearerFormat: JWT
  */
-router.delete('/:id', authenticate, deleteEvent);
+router.delete('/:id', authenticate, deleteSchedule);
 
 module.exports = router;

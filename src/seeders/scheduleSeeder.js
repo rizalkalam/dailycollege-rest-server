@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const connectDB = require('../config/database'); // Path ke file koneksi database
-const Event = require('../models/Event'); // Pastikan path ke model Event benar
+const Schedule = require('../models/Schedule'); // Pastikan path ke model Event benar
 const User = require('../models/User'); // Pastikan path ke model User benar
 
-async function seedEvents() {
+async function seedSchedules() {
     try {
         // Hubungkan ke database
         await connectDB();
 
-        console.log('Seeding events...');
+        console.log('Seeding shcedules...');
       // Menemukan pengguna pertama, untuk contoh ini kita gunakan user dengan email "kalam@example.com"
       const user = await User.findOne({ email: 'nugasyukmyid@gmail.com' });
   
@@ -18,10 +18,10 @@ async function seedEvents() {
       }
 
       // Hapus semua data pengguna (opsional)
-      await Event.deleteMany();
+      await Schedule.deleteMany();
   
-      // Data event sampel
-      const events = [
+      // Data shcedules sampel
+      const shcedules = [
         {
           user_id: user._id,
           title: 'Meeting with Team',
@@ -48,14 +48,14 @@ async function seedEvents() {
         },
       ];
   
-      // Insert events ke dalam database
-      await Event.insertMany(events);
-      console.log('Events seeded successfully!');
+      // Insert shcedules ke dalam database
+      await Schedule.insertMany(shcedules);
+      console.log('Shcedules seeded successfully!');
       mongoose.connection.close();
     } catch (err) {
-      console.log('Error seeding events:', err);
+      console.log('Error seeding shcedules:', err);
       mongoose.connection.close();
     }
   }
 
-  seedEvents();
+  seedSchedules();
