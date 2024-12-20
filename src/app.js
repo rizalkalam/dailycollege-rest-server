@@ -2,9 +2,12 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const authRoutes = require('./routes/authRoutes');
+const forgotPassword = require('./routes/forgotPasswordRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
 const passport = require('./config/passport');
+const sessionConfig = require('./config/session');
+const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 
@@ -12,11 +15,14 @@ const bodyParser = require('body-parser');
 dotenv.config();
 const app = express();
 
-
+// Middleware untuk body parser (untuk menerima data POST)
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(cookieParser());
+
 // Middleware
-app.use(session({ secret: 'wfowuef9uqr09wuuru39u3', resave: false, saveUninitialized: false }));
+app.use(session(sessionConfig));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -26,6 +32,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/forgot_password', forgotPassword);
 
 // welcome page
 app.get('/', (req, res) => {

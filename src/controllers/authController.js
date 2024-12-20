@@ -25,8 +25,8 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
             html: `
                 <html>
                     <body>
-                        <h2>Welcome to Dailycollege</h2>
-                        <p>Thank you for registering! Your verification code is:</p>
+                        <h2>Thank you for registering! Welcome to Dailycollege</h2>
+                        <p>Your verification code is: </p>
                         <h3>${verificationCode}</h3>
                         <br></br>
                         <p><strong>Dailycollege</strong></p>
@@ -104,11 +104,6 @@ const register = async (req, res) => {
 // Fungsi untuk memverifikasi kode verifikasi yang dimasukkan pengguna
 const verifyAndRegisterUser = async (req, res) => {
     const { verificationCode } = req.body;
-
-    // Debugging session data dan kode verifikasi
-    console.log('Session Verification Code:', req.session.verificationCode);  // Memeriksa kode yang disimpan di session
-    console.log('User Entered Verification Code:', verificationCode);  // Memeriksa kode yang dikirimkan oleh pengguna
-    console.log('Data password: ', req.session.userData.hashedPassword)
 
     // Cek apakah kode verifikasi di session ada dan cocok
     if (verificationCode !== req.session.verificationCode) {

@@ -43,6 +43,13 @@ const seedUsers = async () => {
                 googleId: null,
                 avatar: null
             },
+            {
+                name: 'Erika Yanti',
+                email: 'nugasyukmyid@gmail.com',
+                password: 'erika123',
+                googleId: null,
+                avatar: null
+            },
         ];
 
         // Hash password menggunakan bcrypt
