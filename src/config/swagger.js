@@ -34,4 +34,6 @@ const options = {
     apis: ['./src/routes/*.js'], // Path ke file routes
 };
 
-module.exports = swaggerJSDoc(options);
+const swaggerDocument = swaggerJSDoc(options);
+
+module.exports = swaggerDocument;

@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 const authenticate = (req, res, next) => {
-    // Ambil token dari header Authorization
+    console.log("Authorization header sent by Swagger:", req.headers['authorization']);
     const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    console.log("Token received:", token); // Menambahkan log untuk memeriksa token
 
     if (!token) {
         return res.status(401).json({ message: 'Access Denied. No token provided.' });

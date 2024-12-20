@@ -11,7 +11,7 @@ const authenticate = require('../middlewares/authenticate');
  *     description: Get a list of schedules that belong to the authenticated user.
  *     tags: [Schedules]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: A list of schedules for the user
@@ -88,7 +88,7 @@ router.get('/', authenticate, getSchedules);
  *         schema:
  *           type: string
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Schedule found and details returned
@@ -194,7 +194,7 @@ router.get('/:id', authenticate, getScheduleById);
  *                 description: The reminder time in minutes before the schedule.
  *                 example: 30
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       201:
  *         description: Schedule successfully created
@@ -311,7 +311,7 @@ router.post('/', authenticate, createSchedule);
  *                 description: The reminder time in minutes before the schedule.
  *                 example: 30
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Schedule successfully updated
@@ -405,7 +405,7 @@ router.put('/:id', authenticate, updateSchedule);
  *           type: string
  *           example: "60c72b2f9e8a2b001f8c0b65"
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Schedule successfully deleted
