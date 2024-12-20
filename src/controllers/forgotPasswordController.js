@@ -45,12 +45,7 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
     }
 };
 
-const sendConfirmationEmail = (req, email, verificationCode) => {
-    const resetPasswordUrl = `http://localhost:3000/forgot_password/confirm?code=${verificationCode}&email=${email}`;
-
-    req.session.userNewPassword = req.session.userNewPassword;
-    console.log("Session sendmail:", req.session.userNewPassword); // Cek sesi di sini
-
+const sendConfirmationEmail = (email) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -143,9 +138,7 @@ const newPassword = async (req, res) => {
             return res.status(400).json({ message: 'Verification code is required. Please verify your email first.' });
         }
 
-        const verificationCode = req.session.forgotPasswordCode
         const { email } = req.session.userEmail;
-        console.log("kode verifikasi: ", verificationCode)
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -157,7 +150,7 @@ const newPassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        await sendConfirmationEmail(req, email, verificationCode)
+        await sendConfirmationEmail(email)
 
         return res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
@@ -165,42 +158,5 @@ const newPassword = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 }
-
-// const confirmNewPassword = async (req, res) => {
-//     const { code, email } = req.query;
-
-//     console.log("Session Data before confirming password:", req.session.userNewPassword); // Cek sesi di sini
-
-//     if (!code || !email) {
-//         return res.status(400).json({ message: 'Missing verification code or email.' });
-//     }
-
-//     if (!req.session.userNewPassword) {
-//         return res.status(400).json({ message: 'No new password found in session.' });
-//     }
-
-//     const hashedPassword = req.session.userNewPassword;
-//     if (!hashedPassword) {
-//         return res.status(400).json({ message: 'No password provided.' });
-//     }
-
-//     try {
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
-
-//         user.password = hashedPassword;
-//         await user.save();
-
-//         // Hapus password baru dari sesi setelah berhasil disimpan
-//         req.session.userNewPassword = null;
-
-//         return res.status(200).json({ message: 'Password updated successfully' });
-//     } catch (error) {
-//         console.error('Error:', error.message);
-//         res.status(500).json({ message: error.message });
-//     }
-// };
 
 module.exports = { verifyEmail, verifyCode, newPassword, sendConfirmationEmail }

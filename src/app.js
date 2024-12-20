@@ -3,6 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const authRoutes = require('./routes/authRoutes');
 const forgotPassword = require('./routes/forgotPasswordRoutes')
+const eventRoutes = require('./routes/eventRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
 const passport = require('./config/passport');
@@ -33,6 +34,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes
 app.use('/auth', authRoutes);
 app.use('/forgot_password', forgotPassword);
+app.use('/events', eventRoutes);
 
 // welcome page
 app.get('/', (req, res) => {
