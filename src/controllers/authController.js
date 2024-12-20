@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('../utils/jwt');
+const jwt = require('jsonwebtoken');  // Mengimpor jsonwebtoken
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const profile = require("nodemailer/lib/smtp-connection");
@@ -148,9 +148,16 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.generateToken(user._id);
+        // Gunakan jwt.sign untuk menghasilkan token
+        const token = jwt.sign(
+            { user_id: user._id },  // Payload yang akan disertakan dalam token
+            process.env.JWT_SECRET_KEY || "mysecretkey12345!@#security",  // Secret key untuk menandatangani token
+            { expiresIn: '1h' }  // Token akan kedaluwarsa dalam 1 jam
+        );
+
         res.status(200).json({
-            message: 'Login successful', token
+            message: 'Login successful',
+            token
         });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
