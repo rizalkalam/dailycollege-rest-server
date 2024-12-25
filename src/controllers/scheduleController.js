@@ -23,7 +23,7 @@ const getScheduleById = async (req, res) => {
 
     try {
         // Cari schedule berdasarkan user_id dan event_id
-        const schedule = await Schedule.findOne({ _id: eventId, user_id: userId });
+        const schedule = await Schedule.findOne({ _id: scheduleId, user_id: userId });
 
         if (!schedule) {
             return res.status(404).json({ message: 'Schedule not found or you do not have permission to view it.' });

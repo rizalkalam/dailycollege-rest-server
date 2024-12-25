@@ -9,7 +9,11 @@ const sessionConfig = {
   secret: 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } 
+  cookie: { 
+        secure: false, // set ke true jika menggunakan https
+        httpOnly: true,
+        maxAge: 5 * 60 * 1000  // session expires after 5 minutes
+    }
 };
 
 module.exports = sessionConfig;

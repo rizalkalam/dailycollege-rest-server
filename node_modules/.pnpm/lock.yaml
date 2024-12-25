@@ -32,6 +32,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      email-validator:
+        specifier: ^2.0.4
+        version: 2.0.4
       email-verifier:
         specifier: ^0.4.1
         version: 0.4.1
@@ -395,6 +398,10 @@ packages:
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+
+  email-validator@2.0.4:
+    resolution: {integrity: sha512-gYCwo7kh5S3IDyZPLZf6hSS0MnZT8QmJFqYvbqlDZSbwdZlY6QZWxJ4i/6UhITOJ4XzyI647Bm2MXKCLqnJ4nQ==}
+    engines: {node: '>4.0'}
 
   email-verifier@0.4.1:
     resolution: {integrity: sha512-WZAeqKgsGTCKfuvHimWTYF4Lix1sq7pUeDDAMLT1qrmo7iu8hgxGqZ+lTJn7SEL/RcYqXrjDL2U+NK3SWVkgFA==}
@@ -1417,6 +1424,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   ee-first@1.1.1: {}
+
+  email-validator@2.0.4: {}
 
   email-verifier@0.4.1:
     dependencies:

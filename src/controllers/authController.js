@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');  // Mengimpor jsonwebtoken
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const { generateToken, generateRefreshToken, validateRefreshToken, revokeRefreshToken } = require('../utils/jwt')
+const emailValidator = require('email-validator');
+const redisClient = require('../config/redisClient')
 const profile = require("nodemailer/lib/smtp-connection");
 
 // Fungsi untuk mengirimkan kode verifikasi ke email
@@ -48,6 +51,36 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
     }
 };
 
+const resendVerificationCode = async (req, res) => {
+    try {
+        // Periksa apakah email ada di session
+        if (!req.session.userData || !req.session.userData.email) {
+            return res.status(400).json({ message: 'You must be logged in to request a new verification code.' });
+        }
+
+        const email = req.session.userData.email;
+
+        // Verifikasi email format dan apakah email adalah Gmail
+        await verifyEmail(email);
+
+        // Dapatkan verificationCode dari session
+        const verificationCode = req.session.verificationCode;
+
+        if (!verificationCode) {
+            return res.status(400).json({ message: 'No verification code found in session.' });
+        }
+
+        // Kirim ulang kode verifikasi ke email
+        await sendVerificationEmail(email, verificationCode);
+
+        return res.status(200).json({ message: 'Verification code has been resent. Please check your inbox.' });
+
+    } catch (error) {
+        console.error('Error resending verification code:', error.message);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 // Fungsi untuk memverifikasi email dan memeriksa apakah Gmail
 const verifyEmail = async (email) => {
     try {
@@ -63,37 +96,60 @@ const verifyEmail = async (email) => {
             throw new Error('Email must be a Gmail address');
         }
 
+        if (!emailValidator.validate(email)) {
+            throw new Error('Email format is invalid.');
+        }
+
     } catch (error) {
         throw new Error(error.message || 'Error verifying email');
     }
 };
 
+// Fungsi untuk mengirimkan kode verifikasi
+const sendVerificationCodeToRedis = async (userEmail, verificationCode, sessionId) => {
+    // Menyimpan data ke Redis dengan sessionId sebagai key
+    const key = `verification:${sessionId}`;
+
+    // Simpan data userEmail dan verificationCode di Redis (bisa disesuaikan jika ingin menambahkan waktu kedaluwarsa)
+    await redis.hmset(key, 'userEmail', userEmail, 'verificationCode', verificationCode);
+    await redis.expire(key, 5 * 60);  // Set expiration time ke 5 menit (300 detik)
+};
+
+
 const register = async (req, res) => {
     const { name, email, password, googleToken } = req.body;
 
     try {
-        await verifyEmail(email)
+        await verifyEmail(email);
 
         let googleId = null;
 
         // Hash password jika menggunakan email/password
         const hashedPassword = googleToken ? null : await bcrypt.hash(password, 10);
 
-        // Simpan data pengguna ke session jika menggunakan Google Login
-        req.session.userData = {
+        // Simpan data pengguna ke Redis dengan key yang unik (email)
+        const userData = {
             email,
             name,
             hashedPassword,
             googleId: googleId || null
         };
 
+        // Simpan data pengguna ke Redis (dengan TTL 10 menit)
+        await redisClient.setex(`userData:${email}`, 600, JSON.stringify(userData));
+
+        // Simpan email ke Redis (dengan TTL yang sama, untuk mengambil email saat verifikasi)
+        await redisClient.setex(`userEmail:${email}`, 600, email);
+
         // Jika menggunakan email/password, kirim kode verifikasi ke email
         const verificationCode = Math.floor(10000 + Math.random() * 90000);
 
-        req.session.verificationCode = verificationCode;
+        // Simpan kode verifikasi ke Redis
+        await redisClient.setex(`verificationCode:${email}`, 600, verificationCode);
+
+        // Kirim email verifikasi
         await sendVerificationEmail(email, verificationCode);
 
-        console.log('Session Data:', req.session);
         return res.status(200).json({ message: 'Verification code sent to your email. Please check your inbox.' });
     } catch (error) {
         console.error('Error registering user:', error.message);
@@ -105,63 +161,104 @@ const register = async (req, res) => {
 const verifyAndRegisterUser = async (req, res) => {
     const { verificationCode } = req.body;
 
-    // Cek apakah kode verifikasi di session ada dan cocok
-    if (verificationCode !== req.session.verificationCode) {
-        console.log('Verification code mismatch or missing session data');
-        return res.status(400).json({ message: 'Invalid verification code.' });
-    }
-
     try {
-        // Ambil data pengguna dari session
-        const { email, name, hashedPassword, googleId  } = req.session.userData;
+        // Ambil semua keys yang cocok dengan pola userEmail:*
+        const keys = await redisClient.keys('userEmail:*'); // Mengambil semua keys yang dimulai dengan userEmail:
 
-        // Simpan data pengguna ke database
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,  // hanya diisi jika menggunakan email/password
-            googleId: googleId || null,  // Set googleId ke null jika tidak ada
-        });
-        await newUser.save();
+        // Pastikan ada email yang ditemukan
+        if (keys.length === 0) {
+            return res.status(400).json({ message: 'No email found in Redis' });
+        }
 
-        // Hapus data sementara setelah berhasil verifikasi
-        req.session.destroy((err) => {
-            if (err) console.error('Error destroying session:', err);
-        });
+        // Ambil email terakhir berdasarkan key yang ditemukan
+        const latestEmailKey = keys[keys.length - 1];  // Key terakhir
+        const email = await redisClient.get(latestEmailKey);  // Ambil email berdasarkan key terakhir
+        
+        if (!email) {
+            return res.status(400).json({ message: 'No email found in Redis' });
+        }
 
-        return res.status(200).json({
-            message: 'User registered successfully.',
-            user: { name: newUser.name, email: newUser.email, googleId: newUser.googleId },
-        });
+        // Ambil data pengguna dari Redis
+        const userDataString = await redisClient.get(`userData:${email}`);
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+
+        if (!userData) {
+            return res.status(400).json({ message: 'User data not found in Redis' });
+        }
+
+        // Ambil kode verifikasi yang disimpan di Redis
+        const storedCode = await redisClient.get(`verificationCode:${email}`);
+        
+        if (!storedCode) {
+            return res.status(400).json({ message: 'Verification code expired or invalid' });
+        }
+
+        // Verifikasi kode
+        if (parseInt(storedCode) === parseInt(verificationCode)) {
+            // Simpan data pengguna ke MongoDB
+            const newUser = new User({
+                email: userData.email,
+                name: userData.name,
+                hashedPassword: userData.hashedPassword,
+                googleId: userData.googleId || null,
+                verified: true  // Tandai sebagai sudah terverifikasi
+            });
+
+            // Simpan pengguna ke database MongoDB
+            await newUser.save();
+
+            // Hapus data terkait verifikasi di Redis setelah berhasil disimpan ke MongoDB
+            await redisClient.del(latestEmailKey);
+            await redisClient.del(`userData:${email}`);
+            await redisClient.del(`verificationCode:${email}`);
+
+            return res.status(200).json({ message: 'Verification successful and user registered', user: newUser });
+        } else {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Error verifying code:', error.message);
+        res.status(400).json({ message: error.message });
     }
 };
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const accessToken = generateToken(user._id);
+    const refreshToken = await generateRefreshToken(user._id);
+
+    res.cookie('refreshTokenId', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ token: accessToken });
+};
+
+const refreshToken = async (req, res) => {
+    const refreshToken = req.cookies.refreshTokenId;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token is required' });
+    }
 
     try {
-        const user = await User.findOne({ email });
+        const userId = await validateRefreshToken(refreshToken);
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+        if (!userId) {
+            return res.status(403).json({ message: 'Invalid or expired refresh token' });
         }
 
-        // Gunakan jwt.sign untuk menghasilkan token
-        const token = jwt.sign(
-            { user_id: user._id },  // Payload yang akan disertakan dalam token
-            process.env.JWT_SECRET_KEY || "mysecretkey12345!@#security",  // Secret key untuk menandatangani token
-            { expiresIn: '1h' }  // Token akan kedaluwarsa dalam 1 jam
-        );
-
-        res.status(200).json({
-            message: 'Login successful',
-            token
-        });
+        const newAccessToken = generateToken(userId);
+        res.json({ token: newAccessToken });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
-};
+}
 
-module.exports = { login, register, verifyAndRegisterUser };
+module.exports = { login, register, verifyAndRegisterUser, resendVerificationCode, refreshToken};
