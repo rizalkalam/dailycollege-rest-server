@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, verifyAndRegisterUser, resendVerificationCode, refreshToken} = require('../controllers/authController');
+const { login, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
 const passport = require('passport');
 const router = express.Router();
 
@@ -43,13 +43,27 @@ router.post('/register', register);
  * @swagger
  * /resend-verification-code:
  *   post:
- *     summary: Mengirim ulang kode verifikasi ke email yang terdaftar di session pengguna
- *     description: Endpoint ini mengirim ulang kode verifikasi ke email yang terdaftar pada session. Pengguna harus login terlebih dahulu.
+ *     summary: Resend verification code
+ *     description: Mengirim ulang kode verifikasi ke email pengguna.
  *     tags:
  *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *                 description: Email pengguna yang terdaftar.
+ *             required:
+ *               - email
  *     responses:
  *       200:
- *         description: Kode verifikasi telah dikirim ulang.
+ *         description: Kode verifikasi berhasil dikirim ulang.
  *         content:
  *           application/json:
  *             schema:
@@ -57,9 +71,9 @@ router.post('/register', register);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'Verification code has been resent. Please check your inbox.'
+ *                   example: A new verification code has been sent. Please check your inbox.
  *       400:
- *         description: Terjadi kesalahan, seperti tidak ada email dalam session atau tidak ada kode verifikasi yang ditemukan.
+ *         description: Permintaan tidak valid atau email tidak ditemukan.
  *         content:
  *           application/json:
  *             schema:
@@ -67,9 +81,9 @@ router.post('/register', register);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'You must be logged in to request a new verification code.'
+ *                   example: User data not found. Please register first.
  *       500:
- *         description: Terjadi kesalahan di server.
+ *         description: Terjadi kesalahan saat mengirim ulang kode verifikasi.
  *         content:
  *           application/json:
  *             schema:
@@ -77,7 +91,7 @@ router.post('/register', register);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'Error resending verification code: <error_message>'
+ *                   example: Failed to resend verification code. Please try again later.
  */
 router.post('/resend-verification-code', resendVerificationCode);
 
@@ -181,43 +195,6 @@ router.post('/verify', verifyAndRegisterUser);
  *         description: Server error
  */
 router.post('/login', login);
-
-/**
- * @swagger
- * /refresh-token:
- *   post:
- *     summary: Refresh Access Token
- *     tags: [Authentication]
- *     description: Menggunakan refresh token untuk mendapatkan access token baru.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 description: Refresh token yang valid untuk memperbarui access token.
- *     responses:
- *       200:
- *         description: Access token baru berhasil dibuat.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: Access token baru.
- *       400:
- *         description: Refresh token tidak ditemukan.
- *       403:
- *         description: Refresh token tidak valid atau sudah kedaluwarsa.
- *       500:
- *         description: Terjadi kesalahan pada server.
- */
-router.post('/refresh-token', refreshToken)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
