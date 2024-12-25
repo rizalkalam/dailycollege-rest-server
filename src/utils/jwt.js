@@ -1,26 +1,28 @@
 // utils/jwt.js
 const jwt = require('jsonwebtoken');
+const redisClient = require('../config/redisClient')
 
-// Fungsi untuk menghasilkan token JWT
 const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '1h' });
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY || 'mysecretkey12345!@#security', { expiresIn: '1h' });
 };
 
-// Middleware untuk memverifikasi token JWT
-const authenticateJWT = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1]; // Ambil token dari header Authorization
+const generateRefreshToken = async (userId) => {
+    const refreshToken = jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-    if (!token) {
-        return res.status(403).json({ message: 'Token is required' });
-    }
+    // Simpan refresh token ke Redis dengan waktu kedaluwarsa (7 hari) menggunakan 'EX' untuk expiration time
+    await redisClient.set(`refreshToken:${refreshToken}`, userId);
+    await redisClient.expire(`refreshToken:${refreshToken}`, 7 * 24 * 60 * 60); // Set EX manually (7 days in seconds)
 
-    jwt.verify(token, process.env.JWT_SECRET || 'your-jwt-secret', (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid token' });
-        }
-        req.user = user;
-        next();
-    });
+    return refreshToken;
 };
 
-module.exports = { generateToken, authenticateJWT };
+const validateRefreshToken = async (refreshToken) => {
+    const userId = await redisClient.get(`refreshToken:${refreshToken}`);
+    return userId;
+};
+
+const revokeRefreshToken = async (refreshToken) => {
+    await redisClient.del(`refreshToken:${refreshToken}`);
+};
+
+module.exports = { generateToken, generateRefreshToken, validateRefreshToken, revokeRefreshToken };

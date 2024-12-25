@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');  // Mengimpor jsonwebtoken
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const { generateToken, generateRefreshToken, validateRefreshToken, revokeRefreshToken } = require('../utils/jwt')
+const emailValidator = require('email-validator');
 const profile = require("nodemailer/lib/smtp-connection");
 
 // Fungsi untuk mengirimkan kode verifikasi ke email
@@ -48,6 +50,36 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
     }
 };
 
+const resendVerificationCode = async (req, res) => {
+    try {
+        // Periksa apakah email ada di session
+        if (!req.session.userData || !req.session.userData.email) {
+            return res.status(400).json({ message: 'You must be logged in to request a new verification code.' });
+        }
+
+        const email = req.session.userData.email;
+
+        // Verifikasi email format dan apakah email adalah Gmail
+        await verifyEmail(email);
+
+        // Dapatkan verificationCode dari session
+        const verificationCode = req.session.verificationCode;
+
+        if (!verificationCode) {
+            return res.status(400).json({ message: 'No verification code found in session.' });
+        }
+
+        // Kirim ulang kode verifikasi ke email
+        await sendVerificationEmail(email, verificationCode);
+
+        return res.status(200).json({ message: 'Verification code has been resent. Please check your inbox.' });
+
+    } catch (error) {
+        console.error('Error resending verification code:', error.message);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 // Fungsi untuk memverifikasi email dan memeriksa apakah Gmail
 const verifyEmail = async (email) => {
     try {
@@ -61,6 +93,10 @@ const verifyEmail = async (email) => {
         const isGmail = email.endsWith('@gmail.com');
         if (!isGmail) {
             throw new Error('Email must be a Gmail address');
+        }
+
+        if (!emailValidator.validate(email)) {
+            throw new Error('Email format is invalid.');
         }
 
     } catch (error) {
@@ -139,29 +175,42 @@ const verifyAndRegisterUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const accessToken = generateToken(user._id);
+    const refreshToken = await generateRefreshToken(user._id);
+
+    res.cookie('refreshTokenId', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ token: accessToken });
+};
+
+const refreshToken = async (req, res) => {
+    const refreshToken = req.cookies.refreshTokenId;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token is required' });
+    }
 
     try {
-        const user = await User.findOne({ email });
+        const userId = await validateRefreshToken(refreshToken);
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+        if (!userId) {
+            return res.status(403).json({ message: 'Invalid or expired refresh token' });
         }
 
-        // Gunakan jwt.sign untuk menghasilkan token
-        const token = jwt.sign(
-            { user_id: user._id },  // Payload yang akan disertakan dalam token
-            process.env.JWT_SECRET_KEY || "mysecretkey12345!@#security",  // Secret key untuk menandatangani token
-            { expiresIn: '1h' }  // Token akan kedaluwarsa dalam 1 jam
-        );
-
-        res.status(200).json({
-            message: 'Login successful',
-            token
-        });
+        const newAccessToken = generateToken(userId);
+        res.json({ token: newAccessToken });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
-};
+}
 
-module.exports = { login, register, verifyAndRegisterUser };
+module.exports = { login, register, verifyAndRegisterUser, resendVerificationCode, refreshToken};

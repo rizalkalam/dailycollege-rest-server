@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, verifyAndRegisterUser, forgetPassword} = require('../controllers/authController');
+const { login, register, verifyAndRegisterUser, resendVerificationCode, refreshToken} = require('../controllers/authController');
 const passport = require('passport');
 const router = express.Router();
 
@@ -38,6 +38,48 @@ const router = express.Router();
  *         description: Server error
  */
 router.post('/register', register);
+
+/**
+ * @swagger
+ * /resend-verification-code:
+ *   post:
+ *     summary: Mengirim ulang kode verifikasi ke email yang terdaftar di session pengguna
+ *     description: Endpoint ini mengirim ulang kode verifikasi ke email yang terdaftar pada session. Pengguna harus login terlebih dahulu.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: Kode verifikasi telah dikirim ulang.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Verification code has been resent. Please check your inbox.'
+ *       400:
+ *         description: Terjadi kesalahan, seperti tidak ada email dalam session atau tidak ada kode verifikasi yang ditemukan.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'You must be logged in to request a new verification code.'
+ *       500:
+ *         description: Terjadi kesalahan di server.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Error resending verification code: <error_message>'
+ */
+router.post('/resend-verification-code', resendVerificationCode);
 
 /**
  * @swagger
@@ -140,6 +182,42 @@ router.post('/verify', verifyAndRegisterUser);
  */
 router.post('/login', login);
 
+/**
+ * @swagger
+ * /refresh-token:
+ *   post:
+ *     summary: Refresh Access Token
+ *     tags: [Authentication]
+ *     description: Menggunakan refresh token untuk mendapatkan access token baru.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token yang valid untuk memperbarui access token.
+ *     responses:
+ *       200:
+ *         description: Access token baru berhasil dibuat.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Access token baru.
+ *       400:
+ *         description: Refresh token tidak ditemukan.
+ *       403:
+ *         description: Refresh token tidak valid atau sudah kedaluwarsa.
+ *       500:
+ *         description: Terjadi kesalahan pada server.
+ */
+router.post('/refresh-token', refreshToken)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
