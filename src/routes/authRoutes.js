@@ -41,7 +41,7 @@ router.post('/register', register);
 
 /**
  * @swagger
- * /resend-verification-code:
+ * /auth/resend-verification-code:
  *   post:
  *     summary: Resend verification code
  *     description: Mengirim ulang kode verifikasi ke email pengguna.
