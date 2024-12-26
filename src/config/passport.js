@@ -3,8 +3,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
 passport.use(new GoogleStrategy({
-        clientID: '46915514212-0thpcnql2377i87k6vd53v1kv3d0am0i.apps.googleusercontent.com',
-        clientSecret: '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',
+        clientID: '46915514212-r1sb41g5ghf2vc2bi0paseiq94n74frj.apps.googleusercontent.com',
+        clientSecret: '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',
         callbackURL: 'https://dailycollege.testingfothink.my.id/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
