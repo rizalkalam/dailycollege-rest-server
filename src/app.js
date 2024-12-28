@@ -2,8 +2,10 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./config/swagger');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const forgotPassword = require('./routes/forgotPasswordRoutes')
 const scheduleRoutes = require('./routes/scheduleRoutes')
+const freshRoutes = require('./routes/freshRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
 const passport = require('./config/passport');
@@ -17,7 +19,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000',  // Jika Swagger UI di-hosting di port 3001
+    origin: 'https://dailycollege.vercel.app',  // Jika Swagger UI di-hosting di port 3001
     allowedHeaders: ['Authorization', 'Content-Type'],  // Pastikan Authorization ada di sini
     credentials: true,  // Jika perlu
 };
@@ -43,8 +45,11 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 app.use('/forgot_password', forgotPassword);
 app.use('/schedules', scheduleRoutes);
+
+app.use('/fresh', freshRoutes)
 
 // welcome page
 app.get('/', (req, res) => {

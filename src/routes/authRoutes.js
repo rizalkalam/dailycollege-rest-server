@@ -251,42 +251,35 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
  */
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
     try {
-        // Check if the user is new or an existing user
-        const user = req.user;
+        const { user } = req;  // Ambil user dari request
 
-        // If it's a new user, register the user
+        // Kirimkan token dalam respons
         if (user.isNew) {
-            res.json({
-                message: 'Registration successful!',
-                status: 'success',
+            return res.status(200).json({
+                message: 'Anda berhasil mendaftar!',
                 user: {
                     id: user._id,
                     name: user.name,
                     email: user.email,
                     googleId: user.googleId
                 },
+                redirectTo: 'https://dailycollege.vercel.app/login',
                 isNewUser: true
             });
         } else {
-            // If it's an existing user, log them in
-            res.json({
-                message: 'Login successful!',
-                status: 'success',
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    googleId: user.googleId
-                },
+            return res.status(200).json({
+                message: 'Akun anda sudah terdaftar!',
+                redirectTo: 'https://dailycollege.vercel.app/login',  // URL untuk redirect
                 isNewUser: false
             });
         }
-        // Optionally, redirect to another page after response
-        // res.redirect('/');
+
     } catch (err) {
-        // Handle any errors
-        console.error(err);
-        res.redirect('/login');
+        console.error('Error during callback handling:', err);
+        return res.status(500).json({
+            message: 'Internal Server Error',
+            error: err.message || err
+        })
     }
 });
 

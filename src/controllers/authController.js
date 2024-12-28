@@ -85,7 +85,7 @@ const resendVerificationCode = async (req, res) => {
 
         // Buat key baru sesuai kode verifikasi baru
         const newKey = `userData:${newVerificationCode}`;
-        await redisClient.setex(newKey, 300, JSON.stringify(userData));
+        await redisClient.setex(newKey, 120, JSON.stringify(userData));
 
         // Kirim ulang email verifikasi
         await sendVerificationEmail(email, newVerificationCode);
@@ -149,8 +149,8 @@ const register = async (req, res) => {
             verificationCode: verificationCode // Tambahkan kode verifikasi
         };
 
-        // Simpan data pengguna ke Redis (dengan TTL 10 menit)
-        await redisClient.setex(`userData:${verificationCode}`, 300, JSON.stringify(userData));
+        // Simpan data pengguna ke Redis (dengan TTL 2 menit)
+        await redisClient.setex(`userData:${verificationCode}`, 120, JSON.stringify(userData));
 
         // Kirim email verifikasi
         await sendVerificationEmail(email, verificationCode);
@@ -207,13 +207,34 @@ const verifyAndRegisterUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const user = await User.findOne({ email: req.body.email });
+    const { email, password } = req.body;
 
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    try {
+        // Validasi input
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required.' });
+        }
 
-    const accessToken = generateToken(user._id);
+        // Cari user berdasarkan email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
 
-    res.json({ token: accessToken });
+        // Verifikasi password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
+
+        // Generate token
+        const accessToken = generateToken(user._id);
+
+        return res.status(200).json({ token: accessToken });
+    } catch (error) {
+        console.error('Error during login:', error.message);
+        return res.status(500).json({ message: 'Server error.' });
+    }
 };
 
 module.exports = { login, register, verifyAndRegisterUser, resendVerificationCode};

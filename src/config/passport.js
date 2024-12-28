@@ -9,25 +9,40 @@ passport.use(new GoogleStrategy({
     },
     async (accessToken, refreshToken, profile, done) => {
         try {
+            // Cari pengguna berdasarkan Google ID
             let user = await User.findOne({ googleId: profile.id });
+    
             if (!user) {
-                user = new User({
-                    googleId: profile.id,
-                    name: profile.displayName,
-                    email: profile.emails[0].value,
-                    password: null,
-                });
-                await user.save();
-                user.isNew = true; // Mark as new user
+                // Jika pengguna tidak ada, periksa apakah email sudah terdaftar
+                user = await User.findOne({ email: profile.emails[0].value });
+    
+                if (user) {
+                    // Jika email sudah ada, langsung login
+                    user.googleId = profile.id; // Tambahkan Google ID ke pengguna yang sudah ada
+                    await user.save();  // Simpan update pengguna
+                } else {
+                    // Jika pengguna tidak ditemukan, buat pengguna baru
+                    user = new User({
+                        googleId: profile.id,
+                        name: profile.displayName,
+                        email: profile.emails[0].value,
+                        password: null, // Tidak perlu password
+                    });
+    
+                    await user.save();  // Simpan pengguna baru
+                }
             }
-            done(null, user); // Pass user object to callback
+    
+            // Kirimkan pengguna yang ditemukan atau baru dibuat
+            done(null, user);
+    
         } catch (err) {
             done(err, null);
         }
     }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, user._id);
 });
 
 passport.deserializeUser(async (id, done) => {
