@@ -4,7 +4,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /verify_email:
+ * /forgot_password/verify_email:
  *   post:
  *     summary: Verifikasi Email
  *     tags: [Forgot Password]
@@ -30,7 +30,7 @@ const router = express.Router();
 router.post('/verify_email', verifyEmail);
 /**
  * @swagger
- * /verify_code:
+ * /forgot_password/verify_code:
  *   post:
  *     summary: Verifikasi Kode
  *     tags: [Forgot Password]
@@ -71,7 +71,7 @@ router.post('/verify_email', verifyEmail);
 router.post('/verify_code', verifyCode);
 /**
  * @swagger
- * /new_password:
+ * /forgot_password/new_password:
  *   post:
  *     summary: Buat Password Baru
  *     tags: [Forgot Password]

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
+const redisClient = require('../config/redisClient')
 
 const sendVerificationEmail = async (email, verificationCode, res) => {
     try {
@@ -18,7 +19,6 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
             from: 'Support Team <support@dailycollege.com>',
             to: email,
             subject: 'Email Verification Code',
-            // text: `Your verification code is: ${verificationCode}`,
             html: `
                 <html>
                     <body>
@@ -55,7 +55,7 @@ const sendConfirmationEmail = (email) => {
     });
 
     const mailOptions = {
-        from: 'rizalkhoiru6@gmail.com',
+        from: 'Support Team <support@dailycollege.com>',
         to: email,
         subject: 'Reset Password Request',
         html: `
@@ -95,12 +95,16 @@ const verifyEmail = async (req, res) => {
             return res.status(404).json({ message: 'Email not found' });
         }
 
-         // Simpan email pengguna ke session
-         req.session.userEmail = { email: user.email };
+        const verificationCode = Math.floor(1000 + Math.random() * 9000);
 
-        const verificationCode = Math.floor(10000 + Math.random() * 90000);
+        // Simpan email dan kode verifikasi ke Redis
+        const redisKey = `id_reset_passcode:${verificationCode}`;
+        const redisData = {
+            email: user.email,
+            verificationCode,
+        };
 
-        req.session.verificationCode = verificationCode;
+        await redisClient.setex(redisKey, 120, JSON.stringify(redisData));
         await sendVerificationEmail(email, verificationCode);
 
         return res.status(200).json({ message: 'Verification code sent to your email. Please check your inbox.' });
@@ -113,49 +117,83 @@ const verifyEmail = async (req, res) => {
 const verifyCode = async (req, res) => {
     const { verificationCode } = req.body
 
-    // Cek apakah kode verifikasi di session ada dan cocok
-    if (verificationCode !== req.session.verificationCode) {
-        console.log('Verification code mismatch or missing session data');
-        return res.status(400).json({ message: 'Invalid verification code.' });
+    try {
+         // Ambil data langsung dari Redis berdasarkan verificationCode
+        const redisKey = `id_reset_passcode:${verificationCode}`;
+        const dataString = await redisClient.get(redisKey);
+
+        if (!dataString) {
+            return res.status(400).json({ message: 'Invalid or expired verification code.' });
+        }
+
+        const redisData = JSON.parse(dataString);
+        const email = redisData.email;
+
+        // Simpan informasi verifikasi berhasil ke Redis
+        const passwordResetKey = `verif_reset_passcode:${verificationCode}`;
+        await redisClient.setex(passwordResetKey, 1200, JSON.stringify({ email }));
+
+        // Hapus data kunci lama
+        await redisClient.del(redisKey);
+
+        return res.status(200).json({ message: 'Verification code is valid.' });
+    } catch (error) {
+        console.error('Error verifying code:', error.message);
+        res.status(500).json({ message: 'Server error' });
     }
 
-    req.session.forgotPasswordCode = verificationCode
-
-    return res.status(200).json({
-        message: 'Verification code is valid.',
-    });
 }
 
 const newPassword = async (req, res) => {
-    const { newPassword, confirmPassword } = req.body
+    const { verificationCode, newPassword, confirmPassword } = req.body;
 
-    try {        
+    try {
+        // Validasi input
+        if (!verificationCode || !newPassword || !confirmPassword) {
+            return res.status(400).json({ message: 'Input tidak boleh kosong' });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ message: 'Password harus memiliki minimal 8 karakter' });
+        }
+
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ message: 'Password and confirm password do not match' });
+            return res.status(400).json({ message: 'Password and confirm password do not match.' });
         }
 
-        if (!req.session.forgotPasswordCode) {
-            return res.status(400).json({ message: 'Verification code is required. Please verify your email first.' });
+        // Ambil data dari Redis berdasarkan verificationCode
+        const redisKey = `verif_reset_passcode:${verificationCode}`;
+        const dataString = await redisClient.get(redisKey);
+
+        if (!dataString) {
+            return res.status(400).json({ message: 'Sesi lupa password anda sudah habis, silahkan coba ulang' });
         }
 
-        const { email } = req.session.userEmail;
+        const redisData = JSON.parse(dataString);
+        const email = redisData.email;
 
+        // Hash password baru
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+        // Update password user di database
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'User not found.' });
         }
 
         user.password = hashedPassword;
         await user.save();
 
-        await sendConfirmationEmail(email)
+        // Kirim email konfirmasi
+        await sendConfirmationEmail(email);
 
-        return res.status(200).json({ message: 'Password updated successfully' });
+        // Hapus data verifikasi dari Redis
+        await redisClient.del(redisKey);
+
+        return res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         console.error('Error changing password:', error.message);
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Server error.' });
     }
 }
 

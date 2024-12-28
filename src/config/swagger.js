@@ -25,6 +25,11 @@ const swaggerDefinition = {
                 scheme: 'bearer',
                 bearerFormat: 'JWT',
             },
+            ApiKeyAuth: {
+                type: 'apiKey',
+                in: 'header', // API Key akan dikirimkan melalui header
+                name: 'x-api-key', // Nama header yang digunakan untuk API Key
+            },
         },
     },
 };
