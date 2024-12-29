@@ -266,15 +266,15 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
                     email: user.email,
                     googleId: user.googleId
                 },
-                redirectTo: 'https://dailycollege.vercel.app/',
                 isNewUser: true,
+                redirectTo: 'https://dailycollege.vercel.app/',
                 token: accessToken
             });
         } else {
             return res.status(200).json({
                 message: 'Akun anda sudah terdaftar!',
-                redirectTo: 'https://dailycollege.vercel.app/',  // URL untuk redirect
                 isNewUser: false,
+                redirectTo: 'https://dailycollege.vercel.app/',  // URL untuk redirect
                 token: accessToken
             });
         }

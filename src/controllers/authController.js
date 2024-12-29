@@ -189,7 +189,7 @@ const verifyAndRegisterUser = async (req, res) => {
         const newUser = new User({
             email: userData.email,
             name: userData.name,
-            hashedPassword: userData.hashedPassword,
+            password: userData.hashedPassword,
             googleId: userData.googleId || null,
             verified: true // Tandai sebagai sudah terverifikasi
         });
@@ -199,7 +199,7 @@ const verifyAndRegisterUser = async (req, res) => {
         // Hapus data pengguna dari Redis setelah berhasil disimpan
         await redisClient.del(`userData:${verificationCode}`);
 
-        return res.status(200).json({ message: 'Verification successful and user registered', user: newUser });
+        return res.status(200).json({ message: 'Verification successful and user registered' });
     } catch (error) {
         console.error('Error verifying code:', error.message);
         res.status(400).json({ message: error.message });

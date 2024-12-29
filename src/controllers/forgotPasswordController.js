@@ -114,6 +114,67 @@ const verifyEmail = async (req, res) => {
     }
 }
 
+const resendVerifyEmail = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // Cari pengguna berdasarkan email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Email not found' });
+        }
+
+        // Pencarian key dengan pola 'id_reset_passcode*'
+        const redisPattern = 'id_reset_passcode:*';
+        const keys = await redisClient.keys(redisPattern);  // Dapatkan semua key yang cocok dengan pola
+
+        // Loop untuk mencari key yang sesuai dengan email di dalamnya
+        let redisData = null;
+        for (let key of keys) {
+            const data = await redisClient.get(key);
+            const parsedData = JSON.parse(data);
+
+            // Jika email ditemukan di Redis
+            if (parsedData.email === email) {
+                redisData = parsedData;
+                break;
+            }
+        }
+
+        // Jika tidak ada data ditemukan di Redis
+        if (!redisData) {
+            return res.status(404).json({ message: 'Verification code not found for the provided email' });
+        }
+
+        // Hapus kode verifikasi lama
+        await redisClient.del(`id_reset_passcode:${redisData.verificationCode}`);
+
+        // Buat kode verifikasi baru
+        const verificationCode = Math.floor(1000 + Math.random() * 9000);
+
+        // Simpan kode verifikasi baru ke Redis dengan email yang sama
+        const newRedisData = {
+            email: user.email,
+            verificationCode,
+        };
+
+        const newRedisKey = `id_reset_passcode:${verificationCode}`; // Membuat key baru dengan kode verifikasi baru
+        await redisClient.setex(newRedisKey, 120, JSON.stringify(newRedisData));
+
+        // Kirimkan email dengan kode verifikasi baru
+        await sendVerificationEmail(email, verificationCode);
+
+        return res.status(200).json({
+            message: 'New verification code sent to your email. Please check your inbox.'
+        });
+
+    } catch (error) {
+        console.error('Error resending verification email:', error.message);
+        res.status(400).json({ message: error.message });
+    }
+};
+
 const verifyCode = async (req, res) => {
     const { verificationCode } = req.body
 
@@ -197,4 +258,4 @@ const newPassword = async (req, res) => {
     }
 }
 
-module.exports = { verifyEmail, verifyCode, newPassword, sendConfirmationEmail }
+module.exports = { verifyEmail, resendVerifyEmail, verifyCode, newPassword, sendConfirmationEmail }
