@@ -30,7 +30,7 @@ const router = express.Router();
 router.post('/verify_email', verifyEmail);
 /**
  * @swagger
- * /resend_verify_email:
+ * /forgot_password/resend_verify_email:
  *   post:
  *     summary: Resend verification email
  *     description: Mengirimkan kode verifikasi baru ke email yang diberikan.
