@@ -19,7 +19,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: 'https://dailycollege.vercel.app',  // Jika Swagger UI di-hosting di port 3001
+    origin: ['http://localhost:3000', 'https://dailycollege.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type'],  // Pastikan Authorization ada di sini
     credentials: true,  // Jika perlu
