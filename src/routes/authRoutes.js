@@ -2,6 +2,7 @@ const express = require('express');
 const { login, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
 const passport = require('passport');
 const router = express.Router();
+const { generateToken } = require('../utils/jwt')
 
 /**
  * @swagger
@@ -208,10 +209,7 @@ router.post('/login', login);
  *       200:
  *         description: "Redirects to Google OAuth login"
  */
-router.get('/google', (req, res)=>{
-    const googleAuthURL = 'https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=https%3A%2F%2Fdailycollege.testingfothink.my.id%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=46915514212-r1sb41g5ghf2vc2bi0paseiq94n74frj.apps.googleusercontent.com&service=lso&o2v=2&ddm=1&flowName=GeneralOAuthFlow'
-    res.redirect(googleAuthURL)
-})
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 /**
  * @swagger
@@ -256,6 +254,8 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     try {
         const { user } = req;  // Ambil user dari request
 
+        const accessToken = generateToken(user._id);
+
         // Kirimkan token dalam respons
         if (user.isNew) {
             return res.status(200).json({
@@ -266,14 +266,16 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
                     email: user.email,
                     googleId: user.googleId
                 },
-                redirectTo: 'https://dailycollege.vercel.app/login',
-                isNewUser: true
+                redirectTo: 'https://dailycollege.vercel.app/',
+                isNewUser: true,
+                token: accessToken
             });
         } else {
             return res.status(200).json({
                 message: 'Akun anda sudah terdaftar!',
-                redirectTo: 'https://dailycollege.vercel.app/login',  // URL untuk redirect
-                isNewUser: false
+                redirectTo: 'https://dailycollege.vercel.app/',  // URL untuk redirect
+                isNewUser: false,
+                token: accessToken
             });
         }
 
