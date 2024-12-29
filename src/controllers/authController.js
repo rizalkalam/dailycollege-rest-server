@@ -129,7 +129,7 @@ const register = async (req, res) => {
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email is already registered. Please use another email.' });
+            return res.status(400).json({ message: 'Email anda sudah terdaftar' });
         }
 
         let googleId = null;
@@ -182,7 +182,7 @@ const verifyAndRegisterUser = async (req, res) => {
         }
 
         if (!userData) {
-            return res.status(400).json({ message: 'Verification code invalid or expired' });
+            return res.status(400).json({ message: 'Kode verifikasi anda salah/expired' });
         }
 
         // Simpan data ke MongoDB setelah verifikasi berhasil
@@ -199,7 +199,7 @@ const verifyAndRegisterUser = async (req, res) => {
         // Hapus data pengguna dari Redis setelah berhasil disimpan
         await redisClient.del(`userData:${verificationCode}`);
 
-        return res.status(200).json({ message: 'Verification successful and user registered' });
+        return res.status(200).json({ message: 'Verifikasi sukses data berhasil terdaftar' });
     } catch (error) {
         console.error('Error verifying code:', error.message);
         res.status(400).json({ message: error.message });
@@ -212,19 +212,19 @@ const login = async (req, res) => {
     try {
         // Validasi input
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required.' });
+            return res.status(400).json({ message: 'Email dan password harus diisi' });
         }
 
         // Cari user berdasarkan email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials.' });
+            return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
         // Verifikasi password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid credentials.' });
+            return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
         // Generate token
@@ -233,7 +233,7 @@ const login = async (req, res) => {
         return res.status(200).json({ token: accessToken });
     } catch (error) {
         console.error('Error during login:', error.message);
-        return res.status(500).json({ message: 'Server error.' });
+        return res.status(500).json({ message: 'Kesalahan server' });
     }
 };
 
