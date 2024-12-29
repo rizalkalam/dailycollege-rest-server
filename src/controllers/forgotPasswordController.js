@@ -144,7 +144,24 @@ const resendVerifyEmail = async (req, res) => {
 
         // Jika tidak ada data ditemukan di Redis
         if (!redisData) {
-            return res.status(404).json({ message: 'Verification code not found for the provided email' });
+             // Buat kode verifikasi baru
+             const verificationCode = Math.floor(1000 + Math.random() * 9000);
+
+             // Simpan kode verifikasi baru ke Redis dengan email yang sama
+             const newRedisData = {
+                 email: user.email,
+                 verificationCode,
+             };
+ 
+             const newRedisKey = `id_reset_passcode:${verificationCode}`; // Membuat key baru dengan kode verifikasi baru
+             await redisClient.setex(newRedisKey, 120, JSON.stringify(newRedisData));
+ 
+             // Kirimkan email dengan kode verifikasi baru
+             await sendVerificationEmail(email, verificationCode);
+ 
+             return res.status(200).json({
+                 message: 'New verification code sent to your email. Please check your inbox.'
+             });
         }
 
         // Hapus kode verifikasi lama
