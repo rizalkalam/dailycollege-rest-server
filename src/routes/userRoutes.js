@@ -11,6 +11,8 @@ const { getUser } = require('../controllers/userController')
  *     description: Mengambil data pengguna yang terverifikasi menggunakan token JWT.
  *     tags:
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Data pengguna berhasil diambil
