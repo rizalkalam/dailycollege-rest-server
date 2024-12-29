@@ -208,7 +208,10 @@ router.post('/login', login);
  *       200:
  *         description: "Redirects to Google OAuth login"
  */
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', (req, res)=>{
+    const googleAuthURL = 'https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=https%3A%2F%2Fdailycollege.testingfothink.my.id%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=46915514212-r1sb41g5ghf2vc2bi0paseiq94n74frj.apps.googleusercontent.com&service=lso&o2v=2&ddm=1&flowName=GeneralOAuthFlow'
+    res.redirect(googleAuthURL)
+})
 
 /**
  * @swagger
