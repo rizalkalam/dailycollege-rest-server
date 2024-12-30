@@ -67,7 +67,7 @@ const resendVerificationCode = async (req, res) => {
         });
 
         if (!matchingKey) {
-            return res.status(400).json({ message: 'User data not found. Please register first.' });
+            return res.status(400).json({ message: 'Data pengguna tidak ditemukan. Daftar akun terlebih dahulu' });
         }
 
         // Ambil data pengguna dari Redis
@@ -93,7 +93,7 @@ const resendVerificationCode = async (req, res) => {
         return res.status(200).json({ message: 'A new verification code has been sent. Please check your inbox.' });
     } catch (error) {
         console.error('Error resending verification code:', error.message);
-        return res.status(500).json({ message: 'Failed to resend verification code. Please try again later.' });
+        return res.status(500).json({ message: 'Gagal mengirim kode verifikasi. Mohon ulangi lagi nanti' });
     }
 };
 
@@ -103,21 +103,21 @@ const verifyEmail = async (email) => {
         // Cek apakah email valid dengan regex
         const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
         if (!emailRegex.test(email)) {
-            throw new Error('Invalid email format');
+            throw new Error('Format email anda tidak valid');
         }
 
         // Cek apakah email adalah Gmail
         const isGmail = email.endsWith('@gmail.com');
         if (!isGmail) {
-            throw new Error('Email must be a Gmail address');
+            throw new Error('Email harus gmail');
         }
 
         if (!emailValidator.validate(email)) {
-            throw new Error('Email format is invalid.');
+            throw new Error('Format email tidak valid');
         }
 
     } catch (error) {
-        throw new Error(error.message || 'Error verifying email');
+        throw new Error(error.message || 'Verifikasi email gagal');
     }
 };
 

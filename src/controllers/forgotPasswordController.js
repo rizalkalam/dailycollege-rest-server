@@ -92,7 +92,7 @@ const verifyEmail = async (req, res) => {
         const user = await User.findOne({email})
 
         if (!user){
-            return res.status(404).json({ message: 'Email not found' });
+            return res.status(404).json({ message: 'Email tidak ditemukan' });
         }
 
         const verificationCode = Math.floor(1000 + Math.random() * 9000);
@@ -122,7 +122,7 @@ const resendVerifyEmail = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ message: 'Email not found' });
+            return res.status(404).json({ message: 'Email tidak ditemukan' });
         }
 
         // Pencarian key dengan pola 'id_reset_passcode*'
@@ -201,7 +201,7 @@ const verifyCode = async (req, res) => {
         const dataString = await redisClient.get(redisKey);
 
         if (!dataString) {
-            return res.status(400).json({ message: 'Invalid or expired verification code.' });
+            return res.status(400).json({ message: 'Kode verifikasi anda salah/expired' });
         }
 
         const redisData = JSON.parse(dataString);
@@ -217,7 +217,7 @@ const verifyCode = async (req, res) => {
         return res.status(200).json({ message: 'Verification code is valid.' });
     } catch (error) {
         console.error('Error verifying code:', error.message);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Kesalahan server' });
     }
 
 }
@@ -256,7 +256,7 @@ const newPassword = async (req, res) => {
         // Update password user di database
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
         }
 
         user.password = hashedPassword;
@@ -271,7 +271,7 @@ const newPassword = async (req, res) => {
         return res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         console.error('Error changing password:', error.message);
-        return res.status(500).json({ message: 'Server error.' });
+        return res.status(500).json({ message: 'Kesalahan server' });
     }
 }
 
