@@ -1,20 +1,70 @@
 const { formatDateTime, addMinutesToDate } = require('../utils/dateHelper')
 const Schedule = require('../models/Schedule');  // Pastikan path ke model Event benar
+const Color = require("../models/Color");
+const Day = require("../models/Days");
+const Studying = require("../models/Studying");
+const Activity = require("../models/Activity");
 
-// Function untuk mendapatkan semua event berdasarkan user_id
 const getSchedules = async (req, res) => {
-  try {
-    const schedules = await Schedule.find({ user_id: req.user_id });  // Ambil schedules berdasarkan user_id yang terautentikasi
-
-    if (schedules.length === 0) {
-        return res.status(200).json({ message: 'No schedules found for this user.', schedules });
+    try {
+      // Menarik schedules berdasarkan user_id yang terautentikasi dan menghubungkan data terkait (populate)
+      const schedules = await Schedule.find({ user_id: req.user._id }) // Menggunakan user_id dari request
+        .populate({
+          path: 'study_id',  // Menghubungkan dengan model Studying
+          select: '_id title start_date_time end_date_time place room day_id color_id user_id',
+          populate: [
+            { path: 'color_id', select: 'color_name color_value' },  // Menghubungkan dengan model Color
+          ],
+        })
+        .populate({
+          path: 'activity_id',  // Menghubungkan dengan model Activity
+          select: '_id title description start_date_time end_date_time day_id color_id user_id',
+          populate: [
+            { path: 'color_id', select: 'color_name color_value' },  // Menghubungkan dengan model Color
+          ],
+        });
+  
+      if (schedules.length === 0) {
+        return res.status(200).json({ message: 'Jadwal kosong', schedules: [] });
+      }
+  
+      // Memformat response menjadi yang diinginkan
+      const formattedSchedules = schedules.map(schedule => {
+        const study = schedule.study_id;
+        const activity = schedule.activity_id;
+  
+        return [
+          {
+            _id: study._id,
+            user_id: study.user_id,
+            title: study.title,
+            start_date_time: study.start_date_time,
+            end_date_time: study.end_date_time,
+            color: {
+              name: study.color_id.color_name,
+              value: study.color_id.color_value,
+            },
+          },
+          {
+            _id: activity._id,
+            title: activity.title,
+            subject: activity.subject,  // Menambahkan subject sesuai format yang diminta
+            description: activity.description,
+            start_date_time: activity.start_date_time,
+            end_date_time: activity.end_date_time,
+            color: {
+              name: activity.color_id.color_name,
+              value: activity.color_id.color_value,
+            },
+          }
+        ];
+      }).flat();  // Menggunakan .flat() untuk meratakan array dalam response
+  
+      res.status(200).json(formattedSchedules);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Kesalahan server.' });
     }
-
-    res.status(200).json(schedules);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error.' });
-  }
 };
 
 const getScheduleById = async (req, res) => {

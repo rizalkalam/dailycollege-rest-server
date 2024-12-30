@@ -7,7 +7,7 @@ const authenticate = async (req, res, next) => {
 
      // Jika token tidak ditemukan, beri respons error
      if (!token) {
-         return res.status(401).json({ message: 'Access Denied. No token provided.' });
+         return res.status(401).json({ message: 'Akses ditolak. Token tidak sah.' });
      }
  
      try {
@@ -16,13 +16,13 @@ const authenticate = async (req, res, next) => {
  
          // Pastikan bahwa `id` ada di dalam token
          if (!decoded.id) {
-             return res.status(401).json({ message: 'Invalid token: id missing.' });
+             return res.status(401).json({ message: 'Token tidak valid: tidak ada id.' });
          }
  
          // Cari pengguna di database berdasarkan `id` yang ada di token
          const user = await User.findById(decoded.id);
          if (!user) {
-             return res.status(404).json({ message: 'User not found.' });
+             return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
          }
  
          // Simpan data pengguna ke dalam req.user
@@ -32,7 +32,7 @@ const authenticate = async (req, res, next) => {
          next();
      } catch (err) {
          // Jika token tidak valid atau kadaluarsa, beri respons error
-         return res.status(401).json({ message: 'Invalid or expired token.', error: err.message });
+         return res.status(401).json({ message: 'Kode autentikasi anda salah/expired', error: err.message });
      }
 };
 
