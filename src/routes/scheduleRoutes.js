@@ -66,6 +66,8 @@ router.get('/', authenticate, getSchedules);
  *     description: Membuat jadwal kuliah baru dengan data yang diberikan.
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -149,6 +151,8 @@ router.post('/study', authenticate, createStudySchedule);
  *     description: Mengubah data jadwal kuliah yang sudah ada
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -239,6 +243,8 @@ router.put('/study/:id', authenticate, editStudySchedule);
  *     description: Membuat jadwal aktivitas baru dengan data yang diberikan.
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -316,6 +322,8 @@ router.post('/activity', authenticate, createActivitySchedule);
  *     description: Mengubah data aktivitas yang sudah ada
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -407,6 +415,8 @@ router.put('/activity/:id', authenticate, editActivitySchedule);
  *           type: string
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: "Berhasil menghapus data jadwal."
@@ -449,6 +459,8 @@ router.delete('/:id', authenticate, deleteScheduleById);
  *     description: "Endpoint untuk mendapatkan data semua warna yang tersedia di sistem."
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: "Berhasil mengambil data warna."
@@ -492,6 +504,8 @@ router.get('/colors', getColors);
  *     description: "Endpoint untuk mendapatkan data semua hari yang tersedia di sistem."
  *     tags:
  *       - Schedules
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: "Berhasil mengambil data hari."
