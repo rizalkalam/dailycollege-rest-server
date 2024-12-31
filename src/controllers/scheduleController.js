@@ -1,192 +1,109 @@
 const { formatDateTime, addMinutesToDate } = require('../utils/dateHelper')
-const Schedule = require('../models/Schedule');  // Pastikan path ke model Event benar
 const Color = require("../models/Color");
 const Day = require("../models/Days");
 const Studying = require("../models/Studying");
 const Activity = require("../models/Activity");
 
 const getSchedules = async (req, res) => {
-    try {
-      // Menarik schedules berdasarkan user_id yang terautentikasi dan menghubungkan data terkait (populate)
-      const schedules = await Schedule.find({ user_id: req.user._id }) // Menggunakan user_id dari request
-        .populate({
-          path: 'study_id',  // Menghubungkan dengan model Studying
-          select: '_id title start_date_time end_date_time place room day_id color_id user_id',
-          populate: [
-            { path: 'color_id', select: 'color_name color_value' },  // Menghubungkan dengan model Color
-          ],
-        })
-        .populate({
-          path: 'activity_id',  // Menghubungkan dengan model Activity
-          select: '_id title description start_date_time end_date_time day_id color_id user_id',
-          populate: [
-            { path: 'color_id', select: 'color_name color_value' },  // Menghubungkan dengan model Color
-          ],
-        });
-  
-      if (schedules.length === 0) {
-        return res.status(200).json({ message: 'Jadwal kosong', schedules: [] });
-      }
-  
-      // Memformat response menjadi yang diinginkan
-      const formattedSchedules = schedules.map(schedule => {
-        const study = schedule.study_id;
-        const activity = schedule.activity_id;
-  
-        return [
-          {
-            _id: study._id,
-            user_id: study.user_id,
-            title: study.title,
-            start_date_time: study.start_date_time,
-            end_date_time: study.end_date_time,
-            color: {
-              name: study.color_id.color_name,
-              value: study.color_id.color_value,
-            },
-          },
-          {
-            _id: activity._id,
-            title: activity.title,
-            subject: activity.subject,  // Menambahkan subject sesuai format yang diminta
-            description: activity.description,
-            start_date_time: activity.start_date_time,
-            end_date_time: activity.end_date_time,
-            color: {
-              name: activity.color_id.color_name,
-              value: activity.color_id.color_value,
-            },
-          }
+  try {
+      // Ambil data jadwal belajar (Studying) berdasarkan user_id
+      const studying = await Studying.find({ user_id: req.user._id })
+          .populate({ path: 'color_id', select: 'color_name color_value' })
+          .populate({ path: 'day_id', select: 'name' });
+
+      // Ambil data aktivitas (Activity) berdasarkan user_id
+      const activities = await Activity.find({ user_id: req.user._id })
+          .populate({ path: 'color_id', select: 'color_name color_value' })
+          .populate({ path: 'day_id', select: 'name' });
+
+      // Gabungkan data Studying dan Activity menjadi satu array
+      const formattedSchedules = [
+          ...studying.map(study => ({
+              _id: study._id,
+              user_id: study.user_id,
+              title: study.title,
+              day: study.day_id.name,
+              start_time: study.start_time,
+              end_time: study.end_time,
+              place: study.place,
+              room: study.room,
+              color: {
+                  name: study.color_id.color_name,
+                  value: study.color_id.color_value,
+              },
+          })),
+          ...activities.map(activity => ({
+              _id: activity._id,
+              user_id: activity.user_id,
+              title: activity.title,
+              description: activity.description,
+              day: activity.day_id.name,
+              start_time: activity.start_time,
+              end_time: activity.end_time,
+              color: {
+                  name: activity.color_id.color_name,
+                  value: activity.color_id.color_value,
+              },
+          })),
         ];
-      }).flat();  // Menggunakan .flat() untuk meratakan array dalam response
-  
-      res.status(200).json(formattedSchedules);
+
+        if (formattedSchedules.length === 0) {
+            return res.status(200).json({ message: 'Jadwal kosong', schedules: [] });
+        }
+
+        res.status(200).json(formattedSchedules);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Kesalahan server.' });
+        console.error(err);
+        res.status(500).json({ message: 'Kesalahan server.' });
     }
 };
 
-const getScheduleById = async (req, res) => {
-    const userId = req.user_id;  // Ambil user_id dari request (hasil autentikasi)
-    const scheduleId = req.params.id; // Ambil event_id dari URL parameter
+const deleteScheduleById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    try {
-        // Cari schedule berdasarkan user_id dan event_id
-        const schedule = await Schedule.findOne({ _id: scheduleId, user_id: userId });
-
-        if (!schedule) {
-            return res.status(404).json({ message: 'Schedule not found or you do not have permission to view it.' });
-        }
-
-        // Jika schedule ditemukan, kirimkan data schedule
-        res.status(200).json(schedule);
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
-    }
-}
-
-const createSchedule = async (req, res) => {
-    const { title, start_date, start_time, end_date, end_time, notes, reminder } = req.body;
-    const userId = req.user_id;
-
-    if (!title || !start_date || !start_time || !end_date || !end_time) {
-        return res.status(400).json({ message: 'Title, start date, start time, end date, and end time are required.' });
+    // Cek apakah ID ada di koleksi Activity
+    const activity = await Activity.findById(id);
+    if (activity) {
+      await activity.deleteOne();
+      return res.status(200).json({ message: 'Data activity berhasil dihapus.' });
     }
 
-    // Gunakan helper untuk memformat start_date dan start_time
-    const startDateTime = formatDateTime(start_date, start_time);
-    const endDateTime = formatDateTime(end_date, end_time);
-
-    let reminderDate;
-    if (reminder) {
-        if (isNaN(reminder) || reminder <= 0) {
-            return res.status(400).json({ message: 'Reminder must be a positive number representing minutes before the schedule.' });
-        }
-
-        reminderDate = addMinutesToDate(startDateTime, reminder);
+    // Cek apakah ID ada di koleksi Study
+    const study = await Studying.findById(id);
+    if (study) {
+      await study.deleteOne();
+      return res.status(200).json({ message: 'Data study berhasil dihapus.' });
     }
 
-    try {
-        const newSchedule = new Schedule({
-            user_id: userId,
-            title,
-            start_date_time: startDateTime,
-            end_date_time: endDateTime,
-            notes,
-            reminder: reminderDate || null
-        });
-
-        const savedSchedule = await newSchedule.save();
-        res.status(201).json(savedSchedule);
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
-    }
-}
-
-const updateSchedule = async (req, res) => {
-    const userId = req.user_id;  // Ambil user_id dari request (hasil autentikasi)
-    const scheduleId = req.params.id; // Ambil event_id dari URL parameter
-    const { title, start_date, start_time, end_date, end_time, notes, reminder } = req.body;
-
-    try {
-         // Cari schedule berdasarkan event_id dan user_id
-         const schedule = await Schedule.findOne({ _id: scheduleId, user_id: userId });
-
-         if (!schedule) {
-             return res.status(404).json({ message: 'Schedule not found or you are not authorized to update this schedule.' });
-         }
- 
-         // Format tanggal dan waktu menggunakan helper (gunakan dayjs atau helper lainnya)
-         const startDateTime = new Date(`${start_date}T${start_time}`);
-         const endDateTime = new Date(`${end_date}T${end_time}`);
- 
-         // Update schedule dengan data baru
-         schedule.title = title;
-         schedule.start_date_time = startDateTime;
-         schedule.end_date_time = endDateTime;
-         schedule.notes = notes || schedule.notes;  // Jika catatan tidak ada, biarkan nilai lama
-         if (reminder) {
-             schedule.reminder = reminder;
-         }
- 
-         const updatedSchedule = await schedule.save();
- 
-         res.status(200).json({
-             message: 'Schedule updated successfully',
-             schedule: updatedSchedule
-         });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
-    }
-}
-
-const deleteSchedule = async (req, res) => {
-    const userId = req.user_id;  // Ambil user_id dari request (hasil autentikasi)
-    const scheduleId = req.params.id; // Ambil event_id dari URL parameter
-
-    try {
-        // Cari event berdasarkan event_id dan user_id
-        const schedule = await Schedule.findOneAndDelete({ _id: scheduleId, user_id: userId });
-
-        // Jika event tidak ditemukan atau user tidak memiliki akses
-        if (!schedule) {
-            return res.status(404).json({ message: 'Schedule not found or you are not authorized to delete this schedule.' });
-        }
-
-        // Kirimkan respons jika event berhasil dihapus
-        res.status(200).json({
-            message: 'Schedule deleted successfully',
-        });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
-    }
+    // Jika ID tidak ditemukan di kedua koleksi
+    return res.status(404).json({ message: 'Data dengan ID tersebut tidak ditemukan.' });
+  } catch (error) {
+    console.error('Kesalahan saat menghapus data:', error);
+    res.status(500).json({ message: 'Kesalahan server.' });
+  }
 };
+
+// const getScheduleById = async (req, res) => {
+//     const userId = req.user_id;  // Ambil user_id dari request (hasil autentikasi)
+//     const scheduleId = req.params.id; // Ambil event_id dari URL parameter
+
+//     try {
+//         // Cari schedule berdasarkan user_id dan event_id
+//         const schedule = await Schedule.findOne({ _id: scheduleId, user_id: userId });
+
+//         if (!schedule) {
+//             return res.status(404).json({ message: 'Schedule not found or you do not have permission to view it.' });
+//         }
+
+//         // Jika schedule ditemukan, kirimkan data schedule
+//         res.status(200).json(schedule);
+//     } catch (err) {
+//         res.status(500).json({ message: 'Server error', error: err.message });
+//     }
+// }
 
 module.exports = {
   getSchedules,
-  getScheduleById,
-  createSchedule,
-  updateSchedule,
-  deleteSchedule
+  deleteScheduleById,
 };

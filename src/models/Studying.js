@@ -6,8 +6,9 @@ const studyingSchema = new mongoose.Schema({
     place: { type: String, required: true },
     room: { type: String, required: true },
     color_id: { type: mongoose.Schema.Types.ObjectId, ref: "Color", required: true },
-    start_date_time: { type: Date, required: true }, // Simpan sebagai string, misalnya "08:00"
-    end_date_time: { type: Date, required: true }   // Simpan sebagai string, misalnya "10:00"
+    day_id: { type: mongoose.Schema.Types.ObjectId, ref: "Day", required: true },
+    start_time: { type: String, required: true, match: /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/ }, // Format HH:mm
+    end_time: { type: String, required: true, match: /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/ }   // Format HH:mm
   });
   
 const Studying = mongoose.model("Studying", studyingSchema);
