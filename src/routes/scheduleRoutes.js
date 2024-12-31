@@ -2,6 +2,8 @@ const express = require('express');
 const { getSchedules, deleteScheduleById } = require('../controllers/scheduleController');
 const { createStudySchedule, editStudySchedule } = require('../controllers/studyController');
 const { createActivitySchedule, editActivitySchedule } = require('../controllers/activityController');
+const { getColors } = require('../controllers/colorController');
+const { getDays } = require('../controllers/dayController');
 const router = express.Router();
 const authenticate = require('../middlewares/authenticate');
 
@@ -310,7 +312,7 @@ router.post('/activity', authenticate, createActivitySchedule);
  * @swagger
  * /schedules/activity/{id}:
  *   put:
- *     summary: Edit Aktivitas
+ *     summary: Edit Jadwal Aktivitas
  *     description: Mengubah data aktivitas yang sudah ada
  *     tags:
  *       - Schedules
@@ -390,6 +392,136 @@ router.post('/activity', authenticate, createActivitySchedule);
  */
 router.put('/activity/:id', authenticate, editActivitySchedule);
 
+/**
+ * @swagger
+ * /schedules/{id}:
+ *   delete:
+ *     summary: "Menghapus data jadwal (study atau activity) berdasarkan ID"
+ *     description: "Endpoint untuk menghapus data dari koleksi `Activity` atau `Study` berdasarkan ID yang diberikan."
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: "ID dari jadwal yang ingin dihapus."
+ *         schema:
+ *           type: string
+ *     tags:
+ *       - Schedules
+ *     responses:
+ *       200:
+ *         description: "Berhasil menghapus data jadwal."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Data activity berhasil dihapus."
+ *       404:
+ *         description: "ID tidak ditemukan pada koleksi Activity atau Study."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Data dengan ID tersebut tidak ditemukan."
+ *       500:
+ *         description: "Kesalahan server saat menghapus data."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Kesalahan server."
+ */
 router.delete('/:id', authenticate, deleteScheduleById);
+
+/**
+ * @swagger
+ * /schedules/colors:
+ *   get:
+ *     summary: "Informasi data semua warna"
+ *     description: "Endpoint untuk mendapatkan data semua warna yang tersedia di sistem."
+ *     tags:
+ *       - Schedules
+ *     responses:
+ *       200:
+ *         description: "Berhasil mengambil data warna."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Data warna berhasil diambil."
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       color_name:
+ *                         type: string
+ *                         example: "Red"
+ *                       color_value:
+ *                         type: string
+ *                         example: "#FF4545"
+ *       500:
+ *         description: "Gagal memuat data warna."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Gagal memuat data warna."
+ */
+router.get('/colors', getColors);
+
+/**
+ * @swagger
+ * /schedules/days:
+ *   get:
+ *     summary: "Informas data hari"
+ *     description: "Endpoint untuk mendapatkan data semua hari yang tersedia di sistem."
+ *     tags:
+ *       - Schedules
+ *     responses:
+ *       200:
+ *         description: "Berhasil mengambil data hari."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Data hari berhasil diambil."
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Monday"
+ *       500:
+ *         description: "Gagal memuat data hari."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Gagal memuat data hari."
+ */
+router.get('/days', getDays);
 
 module.exports = router;
