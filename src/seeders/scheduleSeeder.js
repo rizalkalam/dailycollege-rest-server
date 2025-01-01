@@ -44,13 +44,13 @@ async function seedSchedules() {
 
         // Seed Days
         const days = [
-            { name: "Monday" },
-            { name: "Tuesday" },
-            { name: "Wednesday" },
-            { name: "Thursday" },
-            { name: "Friday" },
-            { name: "Saturday" },
-            { name: "Sunday" }
+            { name: "Senin" },
+            { name: "Selasa" },
+            { name: "Rabu" },
+            { name: "Kamis" },
+            { name: "Jum'at" },
+            { name: "Sabtu" },
+            { name: "Minggu" }
         ];
         const dayDocs = await Day.insertMany(days);
         if (!dayDocs.length) {
