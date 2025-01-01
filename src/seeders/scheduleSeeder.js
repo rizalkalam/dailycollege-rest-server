@@ -37,7 +37,7 @@ async function seedSchedules() {
             { color_name: "Blue", color_value: "#5874FF" },
             { color_name: "Purple", color_value: "#9747FF" },
             { color_name: "Beige", color_value: "#FEA88A" },
-            { color_name: "Orangesecondary", color_value: "#FFB567" },
+            { color_name: "orangeSecondary", color_value: "#FFB567" },
             { color_name: "Pink", color_value: "#FF679C" },
         ];
         const colorDocs = await Color.insertMany(colors);
