@@ -34,6 +34,11 @@ async function seedSchedules() {
             { color_name: "Blue", color_value: "#5874FF" },
             { color_name: "Green", color_value: "#95E7AF" },
             { color_name: "Yellow", color_value: "#F8BD00" },
+            { color_name: "Orange", color_value: "#F98825" },
+            { color_name: "Orange_secondary", color_value: "#FFB567" },
+            { color_name: "Purple", color_value: "#9747FF" },
+            { color_name: "Pink", color_value: "#FF679C" },
+            { color_name: "Beige", color_value: "#FEA88A" },
         ];
         const colorDocs = await Color.insertMany(colors);
         if (!colorDocs.length) {
