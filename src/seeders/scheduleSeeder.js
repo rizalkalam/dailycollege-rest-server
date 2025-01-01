@@ -17,7 +17,6 @@ async function seedSchedules() {
         await Day.deleteMany({});
         await Studying.deleteMany({});
         await Activity.deleteMany({});
-        await Schedule.deleteMany({});
         console.log("Database cleared");
 
         // Menemukan pengguna pertama dan kedua berdasarkan email
