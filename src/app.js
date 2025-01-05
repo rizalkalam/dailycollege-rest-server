@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const forgotPassword = require('./routes/forgotPasswordRoutes')
 const scheduleRoutes = require('./routes/scheduleRoutes')
+const taskRoutes = require('./routes/taskRoutes')
 const freshRoutes = require('./routes/freshRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
@@ -49,6 +50,7 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/forgot_password', forgotPassword);
 app.use('/schedules', scheduleRoutes);
+app.use('/tasks', taskRoutes);
 
 app.use('/fresh', freshRoutes)
 
