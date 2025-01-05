@@ -54,7 +54,7 @@ const verifyApiKey = (req, res, next) => {
  *                   example: 'stderr or error message'
  */
 router.get('/seed/all', verifyApiKey, (req, res) => {
-    exec('npm run seed:users && npm run seed:schedules', (err, stdout, stderr) => {
+    exec('npm run seed:schedules && npm run seed:tasks', (err, stdout, stderr) => {
         if (err) {
             return res.status(500).json({
                 message: 'Error executing seeding scripts',
