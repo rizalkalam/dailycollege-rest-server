@@ -10,7 +10,7 @@ const authenticate = require('../middlewares/authenticate');
  *     summary: Membuat tugas baru
  *     tags: [Tasks]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -69,7 +69,7 @@ router.post('/', authenticate, createTask);
  *     summary: Mengedit tugas berdasarkan ID
  *     tags: [Tasks]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -137,7 +137,7 @@ router.put('/:id', authenticate, editTask); // Menggunakan metode PUT untuk meng
  *     summary: Menghapus tugas berdasarkan ID
  *     tags: [Tasks]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -185,7 +185,7 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *     summary: Mendapatkan semua tugas
  *     tags: [Tasks]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Daftar tugas berhasil diambil.
@@ -221,7 +221,7 @@ router.get('/', authenticate, getTasks); // Menggunakan metode GET untuk mendapa
  *     summary: Mendapatkan tugas berdasarkan ID
  *     tags: [Tasks]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
