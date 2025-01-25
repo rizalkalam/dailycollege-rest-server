@@ -34,7 +34,7 @@ router.post('/verify_email', verifyEmail);
  *   post:
  *     summary: Resend verification email
  *     description: Mengirimkan kode verifikasi baru ke email yang diberikan.
- *     tags: [Authentication]
+ *     tags: [Forgot Password]
  *     requestBody:
  *       required: true
  *       content:

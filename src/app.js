@@ -4,8 +4,9 @@ const swaggerDocument = require('./config/swagger');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const forgotPassword = require('./routes/forgotPasswordRoutes')
-const scheduleRoutes = require('./routes/scheduleRoutes')
 const taskRoutes = require('./routes/taskRoutes')
+const dayRoutes = require('./routes/dayRoutes'); 
+const courseScheduleRoutes = require('./routes/courseScheduleRoutes');
 const freshRoutes = require('./routes/freshRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
@@ -49,9 +50,9 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/forgot_password', forgotPassword);
-app.use('/schedules', scheduleRoutes);
 app.use('/tasks', taskRoutes);
-
+app.use('/days', dayRoutes);
+app.use('/course-schedule', courseScheduleRoutes);
 app.use('/fresh', freshRoutes)
 
 // welcome page

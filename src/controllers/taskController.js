@@ -89,11 +89,11 @@ const editTask = async (req, res) => {
         }
 
         // Memperbarui data tugas
-        task.name = name;
-        task.detail = detail;
-        task.status = status;
-        task.priority = priority;
-        task.deadline = deadline;
+        if (name !== undefined) task.name = name;  
+        if (detail !== undefined) task.detail = detail;  
+        if (status !== undefined) task.status = status;  
+        if (priority !== undefined) task.priority = priority;  
+        if (deadline !== undefined) task.deadline = deadline;  
 
         // Menyimpan perubahan
         const updatedTask = await task.save();

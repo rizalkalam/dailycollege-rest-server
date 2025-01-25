@@ -1,9 +1,3 @@
-const mongoose = require("mongoose");
-
-const daysSchema = new mongoose.Schema({
-    name: { type: String, required: true }
-  });
+const daysOfWeek = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];  
   
-const Day = mongoose.model("Day", daysSchema);
-module.exports = Day;
-  
+module.exports = daysOfWeek;  
