@@ -8,7 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed:users": "node src/seeders/userSeeder.js",
-    "seed:schedules": "node src/seeders/scheduleSeeder.js",
+    "seed:course_schedule": "node src/seeders/courseScheduleSeeder.js",
     "seed:tasks": "node src/seeders/taskSeeder.js"
   },
   "keywords": [],
