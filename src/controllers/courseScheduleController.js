@@ -9,7 +9,7 @@ const getCourseSchedulesByDay = async (req, res) => {
   
         // Mengelompokkan jadwal berdasarkan hari  
         const groupedSchedules = schedules.reduce((acc, schedule) => {  
-            const { _id, day, subject, time, location } = schedule;  
+            const { _id, day, subject, start_time, end_time, location } = schedule;  
   
             // Jika hari belum ada di accumulator, buat array baru  
             if (!acc[day]) {  
@@ -20,7 +20,8 @@ const getCourseSchedulesByDay = async (req, res) => {
             acc[day].push({  
                 id: _id,
                 subject,  
-                time,  
+                start_time,
+                end_time,
                 location  
             });  
   
@@ -67,10 +68,10 @@ const getCourseScheduleById = async (req, res) => {
 const addCourseSchedule = async (req, res) => {  
     try {  
         const userId = req.user._id; // Mendapatkan ID pengguna dari req.user  
-        const { day, subject, time, location } = req.body;  
+        const { day, subject, start_time, end_time, location } = req.body;  
   
         // Validasi input  
-        if (!day || !subject || !time || !location) {  
+        if (!day || !subject || !start_time || !end_time || !location) {  
             return res.status(400).json({ message: 'Semua field harus diisi.' });  
         }  
   
@@ -78,7 +79,8 @@ const addCourseSchedule = async (req, res) => {
         const newSchedule = new CourseSchedule({  
             day,  
             subject,  
-            time,  
+            start_time,
+            end_time,     
             location,  
             user_id: userId // Menyimpan ID pengguna  
         });  
@@ -100,7 +102,7 @@ const updateCourseScheduleById = async (req, res) => {
     try {  
         const userId = req.user._id; // Mendapatkan ID pengguna dari req.user  
         const { id } = req.params; // Mengambil ID dari parameter URL  
-        const { day, subject, time, location } = req.body;  
+        const { day, subject, start_time, end_time, location } = req.body;  
   
         // Mencari jadwal berdasarkan ID dan user_id  
         const schedule = await CourseSchedule.findOne({ _id: id, user_id: userId });  
@@ -112,7 +114,8 @@ const updateCourseScheduleById = async (req, res) => {
         // Memperbarui data jadwal  
         if (day) schedule.day = day;  
         if (subject) schedule.subject = subject;  
-        if (time) schedule.time = time;  
+        if (start_time) schedule.start_time = start_time;  
+        if (end_time) schedule.end_time = end_time;  
         if (location) schedule.location = location;  
   
         // Menyimpan perubahan  
