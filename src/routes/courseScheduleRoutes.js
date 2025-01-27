@@ -37,9 +37,12 @@ const authenticate = require('../middlewares/authenticate');
  *                           subject:  
  *                             type: string  
  *                             example: Fisika  
- *                           time:  
+ *                           start_time:  
  *                             type: string  
- *                             example: 10:00 - 12:00  
+ *                             example: 10:00 
+ *                           end_time: 
+ *                             type: string
+ *                             example: 12:00  
  *                           location:  
  *                             type: string  
  *                             example: Ruang B  
@@ -88,9 +91,12 @@ router.get('/', authenticate, getCourseSchedulesByDay)
  *                     subject:  
  *                       type: string  
  *                       example: Matematika  
- *                     time:  
- *                       type: string  
- *                       example: 08:00 - 10:00  
+ *                      start_time:  
+ *                        type: string  
+ *                        example: 10:00 
+ *                      end_time: 
+ *                        type: string
+ *                        example: 12:00  
  *                     location:  
  *                       type: string  
  *                       example: Ruang A  
@@ -125,9 +131,12 @@ router.get('/:id', authenticate, getCourseScheduleById)
  *               subject:  
  *                 type: string  
  *                 example: Matematika  
- *               time:  
+ *               start_time:  
  *                 type: string  
- *                 example: 08:00 - 10:00  
+ *                 example: 10:00 
+ *               end_time: 
+ *                 type: string
+ *                 example: 12:00  
  *               location:  
  *                 type: string  
  *                 example: Ruang A  
@@ -155,9 +164,12 @@ router.get('/:id', authenticate, getCourseScheduleById)
  *                     subject:  
  *                       type: string  
  *                       example: Matematika  
- *                     time:  
+ *                     start_time:  
  *                       type: string  
- *                       example: 08:00 - 10:00  
+ *                       example: 10:00 
+ *                     end_time: 
+ *                       type: string
+ *                       example: 12:00  
  *                     location:  
  *                       type: string  
  *                       example: Ruang A  
@@ -201,9 +213,12 @@ router.post('/', authenticate, addCourseSchedule)
  *               subject:  
  *                 type: string  
  *                 example: Matematika  
- *               time:  
+ *               start_time:  
  *                 type: string  
- *                 example: 08:00 - 10:00  
+ *                 example: 10:00 
+ *               end_time: 
+ *                 type: string
+ *                 example: 12:00  
  *               location:  
  *                 type: string  
  *                 example: Ruang A  
@@ -227,9 +242,12 @@ router.post('/', authenticate, addCourseSchedule)
  *                     subject:  
  *                       type: string  
  *                       example: Matematika  
- *                     time:  
+ *                     start_time:  
  *                       type: string  
- *                       example: 08:00 - 10:00  
+ *                       example: 10:00 
+ *                     end_time: 
+ *                       type: string
+ *                       example: 12:00  
  *                     location:  
  *                       type: string  
  *                       example: Ruang A  
@@ -284,9 +302,12 @@ router.put('/:id', authenticate, updateCourseScheduleById)
  *                     subject:  
  *                       type: string  
  *                       example: Matematika  
- *                     time:  
+ *                     start_time:  
  *                       type: string  
- *                       example: 08:00 - 10:00  
+ *                       example: 10:00 
+ *                     end_time: 
+ *                       type: string
+ *                       example: 12:00  
  *                     location:  
  *                       type: string  
  *                       example: Ruang A  
