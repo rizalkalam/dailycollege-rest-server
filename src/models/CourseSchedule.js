@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');  
   
 const courseScheduleSchema = new mongoose.Schema({  
-    day: { type: String, required: true },  
+    day_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Day', required: true },
     subject: { type: String, required: true },  
     start_time: { type: String, required: true },
     end_time: { type: String, required: true },
