@@ -186,29 +186,50 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *     tags: [Tasks]
  *     security:
  *       - BearerAuth: []
+  *     parameters:
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: "not_completed"
  *     responses:
  *       200:
  *         description: Daftar tugas berhasil diambil.
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   detail:
- *                     type: string
- *                   status:
- *                     type: string
- *                   priority:
- *                     type: string
- *                   deadline:
- *                     type: string
- *                     format: date-time
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Daftar tugas berhasil diambil."
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "60d5ec49f1a2c8b1f8e4e1a1"
+ *                       name:
+ *                         type: string
+ *                         example: "Tugas Matematika"
+ *                       detail:
+ *                         type: string
+ *                         example: "Mengerjakan soal halaman 23"
+ *                       status:
+ *                         type: string
+ *                         example: "belum_jalan"
+ *                       priority:
+ *                         type: string
+ *                         example: "tinggi"
+ *                       deadline:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-02-01T12:00:00Z"
+ *       404:
+ *         description: Tidak ada tugas ditemukan.
  *       500:
  *         description: Kesalahan server.
  */

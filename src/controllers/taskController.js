@@ -2,8 +2,19 @@ const Task = require("../models/Task");
 
 const getTasks = async (req, res) => {
     try {
-        const tasks = await Task.find().populate('user_id'); // Mengambil semua tugas dan populasi user_id
+        const { status } = req.query; // Mengambil parameter status dari query
 
+        let tasks;
+
+        // Jika parameter status ada dan tidak kosong, filter berdasarkan status
+        if (status) {
+            tasks = await Task.find({ status: { $ne: 'selesai' } }).populate('user_id');
+        } else {
+            // Jika parameter status kosong, ambil semua tugas
+            tasks = await Task.find().populate('user_id');
+        }
+
+        // Memformat hasil
         const formattedTasks = tasks.map(task => ({
             _id: task._id,
             name: task.name,
@@ -15,10 +26,10 @@ const getTasks = async (req, res) => {
 
         res.status(200).json({
             message: 'Daftar tugas berhasil diambil.',
-            data: formattedTasks,
+            data: formattedTasks
         });
     } catch (error) {
-        console.error('Kesalahan mengambil tugas:', error);
+        console.error('Kesalahan saat mengambil tugas:', error);
         res.status(500).json({ message: 'Kesalahan server.' });
     }
 };
