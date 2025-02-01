@@ -1,6 +1,6 @@
 const express = require('express');  
 const router = express.Router(); 
-const { getCourseSchedulesByDay, getCourseSchedulesByDayId, getCourseScheduleById, addCourseSchedule, updateCourseSchedulesByDayId, updateCourseScheduleById, deleteCourseSchedule } = require('../controllers/courseScheduleController');  
+const { getCourseSchedulesByDay, getCourseSchedulesByDayId, addCourseSchedule, updateCourseSchedulesByDayId, deleteCourseSchedule } = require('../controllers/courseScheduleController');  
 const authenticate = require('../middlewares/authenticate');
 
 /**
@@ -8,10 +8,17 @@ const authenticate = require('../middlewares/authenticate');
  * /course-schedule:
  *   get:
  *     summary: Mendapatkan jadwal kuliah berdasarkan hari
- *     tags: [Course Schedules]  
+ *     tags: [Course Schedules]
  *     security:
  *       - BearerAuth: []
- *     responses:
+ *     parameters:
+ *       - in: query
+ *         name: day
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: "Senin"
+  *     responses:
  *       200:
  *         description: Jadwal kuliah berhasil diambil.
  *         content:
@@ -23,14 +30,13 @@ const authenticate = require('../middlewares/authenticate');
  *                   type: string
  *                   example: "Jadwal kuliah berhasil diambil."
  *                 data:
- *                   type: array
- *                   items:
+ *                   type: object
+ *                   additionalProperties:
  *                     type: object
  *                     properties:
  *                       id:
  *                         type: string
- *                         format: objectId
- *                         example: "60d5ec49f1a2c8b1f8e4e1a1"
+ *                         example: "679dae674839f630a34e3cdb"
  *                       day:
  *                         type: string
  *                         example: "Senin"
@@ -41,8 +47,7 @@ const authenticate = require('../middlewares/authenticate');
  *                           properties:
  *                             _id:
  *                               type: string
- *                               format: objectId
- *                               example: "679a37d3958244fa6cfa2c87"
+ *                               example: "679dc14b841befa767afc4da"
  *                             subject:
  *                               type: string
  *                               example: "Kimia"
@@ -55,12 +60,6 @@ const authenticate = require('../middlewares/authenticate');
  *                             location:
  *                               type: string
  *                               example: "Ruang C"
- *                             user_id:
- *                               type: string
- *                               format: objectId
- *                               example: "6773c14056bce40746399898"
- *       404:
- *         description: Tidak ada jadwal kuliah ditemukan.
  *       500:
  *         description: Kesalahan server.
  */
@@ -124,70 +123,6 @@ router.get('/', authenticate, getCourseSchedulesByDay)
  *         description: Kesalahan server.
  */
 router.get('/day/:dayId', authenticate, getCourseSchedulesByDayId)
-/**
- * @swagger
- * /course-schedule/{id}:  
- *   get:  
- *     summary: Mendapatkan jadwal kuliah berdasarkan ID  
- *     tags: [Course Schedules]  
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: scheduleId
- *         required: true
- *         description: ID jadwal kuliah yang ingin diambil.
- *         schema:
- *           type: string
- *           format: objectId
- *           example: "679a37d3958244fa6cfa2c87"
- *     responses:
- *       200:
- *         description: Jadwal kuliah berhasil diambil.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Jadwal kuliah berhasil diambil."
- *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       format: objectId
- *                       example: "679a37d3958244fa6cfa2c87"
- *                     subject:
- *                       type: string
- *                       example: "Kimia"
- *                     start_time:
- *                       type: string
- *                       example: "13:00"
- *                     end_time:
- *                       type: string
- *                       example: "15:00"
- *                     location:
- *                       type: string
- *                       example: "Ruang C"
- *                     user_id:
- *                       type: string
- *                       format: objectId
- *                       example: "6773c14056bce40746399898"
- *                     day_id:
- *                       type: string
- *                       format: objectId
- *                       example: "60d5ec49f1a2c8b1f8e4e1a1"
- *                     day_name:
- *                       type: string
- *                       example: "Senin"
- *       404:
- *         description: Jadwal kuliah tidak ditemukan.
- *       500:
- *         description: Kesalahan server.
- */
-router.get('/:scheduleId', authenticate, getCourseScheduleById)
 /**
  * @swagger
  * /course-schedule:  
@@ -261,21 +196,12 @@ router.get('/:scheduleId', authenticate, getCourseScheduleById)
 router.post('/', authenticate, addCourseSchedule)
 /**
  * @swagger
- * /course-schedule/day/{dayId}/multiple:
+ * /course-schedule:
  *   put:
- *     summary: Mengupdate beberapa jadwal kuliah berdasarkan ID hari
+ *     summary: Mengupdate jadwal kuliah dengan input hari dan data jadwal
  *     tags: [Course Schedules]
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: dayId
- *         required: true
- *         description: ID hari untuk mengupdate jadwal kuliah.
- *         schema:
- *           type: string
- *           format: objectId
- *           example: "60d5ec49f1a2c8b1f8e4e1a1"
  *     requestBody:
  *       required: true
  *       content:
@@ -283,6 +209,10 @@ router.post('/', authenticate, addCourseSchedule)
  *           schema:
  *             type: object
  *             properties:
+ *               dayId:
+ *                 type: string
+ *                 format: objectId
+ *                 example: "679dae674839f630a34e3cdb"
  *               schedules:
  *                 type: array
  *                 items:
@@ -291,19 +221,19 @@ router.post('/', authenticate, addCourseSchedule)
  *                     _id:
  *                       type: string
  *                       format: objectId
- *                       example: "679b963e4fac69ea02de6607"
+ *                       example: "679dc14b841befa767afc4da"
  *                     subject:
  *                       type: string
- *                       example: "Matematika"
+ *                       example: "Kimia"
  *                     start_time:
  *                       type: string
- *                       example: "10:00"
+ *                       example: "13:00"
  *                     end_time:
  *                       type: string
- *                       example: "12:00"
+ *                       example: "15:00"
  *                     location:
  *                       type: string
- *                       example: "Ruang 4.18 B"
+ *                       example: "Ruang C"
  *     responses:
  *       200:
  *         description: Jadwal kuliah berhasil diperbarui.
@@ -323,109 +253,29 @@ router.post('/', authenticate, addCourseSchedule)
  *                       _id:
  *                         type: string
  *                         format: objectId
- *                         example: "679b963e4fac69ea02de6607"
- *                       subject:
- *                         type: string
- *                         example: "Matematika"
- *                       start_time:
- *                         type: string
- *                         example: "10:00"
- *                       end_time:
- *                         type: string
- *                         example: "12:00"
- *                       location:
- *                         type: string
- *                         example: "Ruang 4.18 B"
- *                       user_id:
+ *                         example: "679dc14b841befa767afc4da"
+ *                       day_id:
  *                         type: string
  *                         format: objectId
- *                         example: "6773c14056bce40746399898"
+ *                         example: "679dae674839f630a34e3cdb"
+ *                       subject:
+ *                         type: string
+ *                         example: "Kimia"
+ *                       start_time:
+ *                         type: string
+ *                         example: "13:00"
+ *                       end_time:
+ *                         type: string
+ *                         example: "15:00"
+ *                       location:
+ *                         type: string
+ *                         example: "Ruang C"
  *       400:
- *         description: Array jadwal tidak valid.
- *       404:
- *         description: Tidak ada jadwal kuliah ditemukan untuk diperbarui.
+ *         description: Input tidak valid.
  *       500:
  *         description: Kesalahan server.
  */
-router.put('/day/:dayId/multiple', authenticate, updateCourseSchedulesByDayId)
-/**  
- * @swagger  
- * /course-schedule/{id}:  
- *   put:  
- *     summary: Mengedit jadwal kuliah berdasarkan ID  
- *     tags: [Course Schedules]  
- *     security:
- *       - BearerAuth: []
- *     parameters:  
- *       - in: path  
- *         name: id  
- *         required: true  
- *         description: ID dari jadwal kuliah yang ingin diedit  
- *         schema:  
- *           type: string  
- *           format: objectId  
- *           example: 60d5ec49f1a2c8b1f8e4e1a1  
- *     requestBody:  
- *       required: true  
- *       content:  
- *         application/json:  
- *           schema:  
- *             type: object  
- *             properties:  
- *               day:  
- *                 type: string  
- *                 example: Senin  
- *               subject:  
- *                 type: string  
- *                 example: Matematika  
- *               start_time:  
- *                 type: string  
- *                 example: 10:00 
- *               end_time: 
- *                 type: string
- *                 example: 12:00  
- *               location:  
- *                 type: string  
- *                 example: Ruang A  
- *     responses:  
- *       200:  
- *         description: Jadwal kuliah berhasil diperbarui.  
- *         content:  
- *           application/json:  
- *             schema:  
- *               type: object  
- *               properties:  
- *                 message:  
- *                   type: string  
- *                   example: Jadwal kuliah berhasil diperbarui.  
- *                 data:  
- *                   type: object  
- *                   properties:  
- *                     day:  
- *                       type: string  
- *                       example: Senin  
- *                     subject:  
- *                       type: string  
- *                       example: Matematika  
- *                     start_time:  
- *                       type: string  
- *                       example: 10:00 
- *                     end_time: 
- *                       type: string
- *                       example: 12:00  
- *                     location:  
- *                       type: string  
- *                       example: Ruang A  
- *                     user_id:  
- *                       type: string  
- *                       format: objectId  
- *                       example: 60d5ec49f1a2c8b1f8e4e1a1  
- *       404:  
- *         description: Jadwal kuliah tidak ditemukan.  
- *       500:  
- *         description: Kesalahan server.  
- */  
-router.put('/:id', authenticate, updateCourseScheduleById)
+router.put('/', authenticate, updateCourseSchedulesByDayId)
 /**  
  * @swagger  
  * /course-schedule/{id}:  
