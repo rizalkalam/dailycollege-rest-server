@@ -117,35 +117,61 @@ const addCourseSchedule = async (req, res) => {
 
 const updateCourseSchedulesByDayId = async (req, res) => {
     try {
-        const userId = req.user._id; // Mendapatkan ID pengguna dari req.user
-        const { dayId, schedules } = req.body; // Mengambil ID hari dan array jadwal dari body
+        const userId = req.user._id;
+        const dayIdParams = req.params.dayId; // ID hari dari parameter
+        const { dayId: dayIdBody, schedules } = req.body; // Mengambil dayId dari body
 
-        // Validasi input
-        if (!dayId || !Array.isArray(schedules) || schedules.length === 0) {
+        if (!dayIdBody || !Array.isArray(schedules)) {
             return res.status(400).json({ message: 'ID hari dan array jadwal harus disediakan.' });
         }
 
-        // Mengupdate setiap jadwal kuliah
-        const updatedSchedules = await Promise.all(
-            schedules.map(async (schedule) => {
-                const { _id, subject, start_time, end_time, location } = schedule; // Destructuring data jadwal
+        // Mengambil semua jadwal yang ada untuk hari dan pengguna tersebut
+        const existingSchedules = await CourseSchedule.find({ user_id: userId, day_id: dayIdParams });
 
-                // Update atau buat jadwal baru
-                return await CourseSchedule.findOneAndUpdate(
-                    { _id, user_id: userId }, // Mencari berdasarkan ID dan user_id
-                    { day_id: dayId, subject, start_time, end_time, location }, // Data yang ingin diupdate
-                    { new: true, upsert: true } // Mengembalikan dokumen yang telah diperbarui, dan buat baru jika tidak ada
-                );
-            })
-        );
+        // Jika dayId dari parameter tidak sama dengan dayId dari body
+        if (dayIdParams !== dayIdBody) {
+            // Update day_id untuk jadwal yang ada
+            await CourseSchedule.updateMany(
+                { user_id: userId, day_id: dayIdParams },
+                { $set: { day_id: dayIdBody } }
+            );
+        }
 
-        res.status(200).json({
-            message: 'Jadwal kuliah berhasil diperbarui.',
-            data: updatedSchedules // Mengembalikan data yang telah diperbarui
+        // Mengelola jadwal baru dan yang diperbarui
+        for (const schedule of schedules) {
+            if (schedule._id) {
+                // Jika ada _id, lakukan update
+                await CourseSchedule.findByIdAndUpdate(schedule._id, {
+                    subject: schedule.subject,
+                    start_time: schedule.start_time,
+                    end_time: schedule.end_time,
+                    location: schedule.location,
+                    day_id: dayIdBody // Pastikan day_id diperbarui
+                });
+            } else {
+                // Jika tidak ada _id, lakukan create
+                const newSchedule = new CourseSchedule({
+                    user_id: userId,
+                    day_id: dayIdBody,
+                    subject: schedule.subject,
+                    start_time: schedule.start_time,
+                    end_time: schedule.end_time,
+                    location: schedule.location
+                });
+                await newSchedule.save();
+            }
+        }
+
+        // Mengambil semua jadwal yang ada setelah update
+        const updatedSchedules = await CourseSchedule.find({ user_id: userId, day_id: dayIdBody });
+
+        return res.status(200).json({
+            message: "Jadwal kuliah berhasil diperbarui.",
+            data: updatedSchedules
         });
     } catch (error) {
-        console.error('Kesalahan saat memperbarui jadwal kuliah:', error);
-        res.status(500).json({ message: 'Kesalahan server.' });
+        console.error(error);
+        return res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui jadwal kuliah.' });
     }
 };
 
