@@ -227,14 +227,27 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
-        // Generate token
-        const accessToken = generateToken(user._id);
+        // Simpan userId di sesi
+        req.session.userId = user._id.toString();
 
-        return res.status(200).json({ token: accessToken });
+        return res.status(200).json({ message: 'Login berhasil, silakan ambil token.' });
     } catch (error) {
         console.error('Error during login:', error.message);
         return res.status(500).json({ message: 'Kesalahan server' });
     }
 };
 
-module.exports = { login, register, verifyAndRegisterUser, resendVerificationCode};
+const get_token = async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'User tidak terautentikasi' });
+    }
+
+    // Buat token
+    const token = generateToken(userId); // Fungsi untuk menghasilkan token
+
+    return res.status(200).json({ token });
+}
+
+module.exports = { login, get_token, register, verifyAndRegisterUser, resendVerificationCode};
