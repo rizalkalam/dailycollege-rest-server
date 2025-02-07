@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
+const { login, get_token, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
 const passport = require('passport');
 const router = express.Router();
 const { generateToken } = require('../utils/jwt')
@@ -165,8 +165,10 @@ router.post('/verify', verifyAndRegisterUser);
  * @swagger
  * /auth/login:
  *   post:
+ *     tags:
+ *       - Authentication
  *     summary: Login user
- *     tags: [Authentication]
+ *     description: Authenticate user and return a token.
  *     requestBody:
  *       required: true
  *       content:
@@ -188,14 +190,41 @@ router.post('/verify', verifyAndRegisterUser);
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 message:
  *                   type: string
+ *                   example: Login berhasil, silakan ambil token.
  *       401:
- *         description: Invalid email or password
+ *         description: Invalid credentials
  *       500:
  *         description: Server error
  */
 router.post('/login', login);
+
+/**
+ * @swagger
+ * /auth/get-token:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Get token
+ *     description: Retrieve a token for the authenticated user.
+ *     responses:
+ *       200:
+ *         description: Token retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: your_generated_token
+ *       401:
+ *         description: User not authenticated
+ *       500:
+ *         description: Server error
+ */
+router.get('/get-token', get_token)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
