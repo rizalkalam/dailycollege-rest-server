@@ -7,6 +7,8 @@ const forgotPassword = require('./routes/forgotPasswordRoutes')
 const taskRoutes = require('./routes/taskRoutes')
 const dayRoutes = require('./routes/dayRoutes'); 
 const courseScheduleRoutes = require('./routes/courseScheduleRoutes');
+const colorRoutes = require('./routes/colorRoutes');
+const calendarRoutes = require('./routes/calendarRoutes');
 const freshRoutes = require('./routes/freshRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
@@ -53,6 +55,8 @@ app.use('/forgot_password', forgotPassword);
 app.use('/tasks', taskRoutes);
 app.use('/days', dayRoutes);
 app.use('/course-schedule', courseScheduleRoutes);
+app.use('/colors', colorRoutes);
+app.use('/calendar', calendarRoutes);
 app.use('/fresh', freshRoutes)
 
 // welcome page

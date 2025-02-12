@@ -11,7 +11,9 @@
     "seed:course_schedule": "node src/seeders/courseScheduleSeeder.js",
     "seed:tasks": "node src/seeders/taskSeeder.js",
     "seed:financial_record": "node src/seeders/financialRecordSeeder.js",
-    "seed:days": "node src/seeders/daySeeder.js"
+    "seed:days": "node src/seeders/daySeeder.js",
+    "seed:colors": "node src/seeders/colorSeeder.js",
+    "seed:calendar": "node src/seeders/calendarEventSeeder.js"
   },
   "keywords": [],
   "author": "",
