@@ -8,7 +8,7 @@ const sessionConfig = {
   store: new RedisStore({ client: redisClient }), // redisClient sudah berupa objek yang terhubung ke Redis
   secret: 'yourSecretKey',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: { 
         secure: false, // set ke true jika menggunakan https
         httpOnly: true,

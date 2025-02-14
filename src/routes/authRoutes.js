@@ -200,31 +200,7 @@ router.post('/verify', verifyAndRegisterUser);
  */
 router.post('/login', login);
 
-/**
- * @swagger
- * /auth/get-token:
- *   get:
- *     tags:
- *       - Authentication
- *     summary: Get token
- *     description: Retrieve a token for the authenticated user.
- *     responses:
- *       200:
- *         description: Token retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   example: your_generated_token
- *       401:
- *         description: User not authenticated
- *       500:
- *         description: Server error
- */
-router.get('/get-token', get_token)
+// router.get('/get-token', get_token)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
