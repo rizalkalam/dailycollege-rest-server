@@ -228,9 +228,12 @@ const login = async (req, res) => {
         }
 
         // Simpan userId di sesi
-        req.session.userId = user._id.toString();
+        const token = generateToken(user);
 
-        return res.status(200).json({ message: 'Login berhasil, silakan ambil token.' });
+        return res.status(200).json({ 
+            message: 'Login berhasil, silakan ambil token.',
+            token: token
+        });
     } catch (error) {
         console.error('Error during login:', error.message);
         return res.status(500).json({ message: 'Kesalahan server' });
