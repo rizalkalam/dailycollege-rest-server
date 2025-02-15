@@ -118,15 +118,22 @@ const addCourseSchedule = async (req, res) => {
 const updateCourseSchedulesByDayId = async (req, res) => {
     try {
         const userId = req.user._id;
-        const dayIdParams = req.params.dayId; // ID hari dari parameter
+        const dayNameParams = req.params.dayName; // ID hari dari parameter
         const { dayId: dayIdBody, schedules } = req.body; // Mengambil dayId dari body
 
         if (!dayIdBody || !Array.isArray(schedules)) {
             return res.status(400).json({ message: 'ID hari dan array jadwal harus disediakan.' });
         }
 
-        // Mengambil semua jadwal yang ada untuk hari dan pengguna tersebut
-        const existingSchedules = await CourseSchedule.find({ user_id: userId, day_id: dayIdParams });
+        // Mengambil data id dari params
+        const day = await Day.find({name: dayNameParams})
+        if (!day) {
+            return res.status(404).json({ 
+                message: 'Hari tidak ditemukan.' 
+            });
+        }
+
+        const dayIdParams = day._id;
 
         // Jika dayId dari parameter tidak sama dengan dayId dari body
         if (dayIdParams !== dayIdBody) {

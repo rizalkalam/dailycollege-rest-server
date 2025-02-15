@@ -127,21 +127,20 @@ router.get('/day/:dayId', authenticate, getCourseSchedulesByDayId)
 
 /**
  * @swagger
- * /course-schedule/{dayId}:
+ * /course-schedule/{dayName}:
  *   post:
  *     summary: Mengupdate jadwal kuliah dengan input hari dan data jadwal
  *     tags: [Course Schedules]
  *     security:
  *       - BearerAuth: []
-  *     parameters:
+*     parameters:
  *       - in: path
- *         name: dayId
+ *         name: dayName
  *         schema:
  *           type: string
  *         required: true
- *         description: ID hari dari parameter URL
+ *         description: Berdasarkan nama harinya
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -193,7 +192,7 @@ router.get('/day/:dayId', authenticate, getCourseSchedulesByDayId)
  *       500:
  *         description: Kesalahan server
  */
-router.post('/:dayId', authenticate, updateCourseSchedulesByDayId)
+router.post('/:dayName', authenticate, updateCourseSchedulesByDayId)
 
 /**  
  * @swagger  

@@ -34,6 +34,10 @@ app.use(cors(corsOptions)); // Jika menggunakan CORS
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Middleware untuk mem-parsing JSON
+app.use(bodyParser.json()); // Untuk parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // Untuk parsing application/x-www-form-urlencoded
+
 app.use(cookieParser());
 
 // Middleware
