@@ -6,6 +6,7 @@ const { generateToken, generateRefreshToken, validateRefreshToken, revokeRefresh
 const emailValidator = require('email-validator');
 const redisClient = require('../config/redisClient')
 const profile = require("nodemailer/lib/smtp-connection");
+const { v4: uuidv4 } = require('uuid');
 
 // Fungsi untuk mengirimkan kode verifikasi ke email
 const sendVerificationEmail = async (email, verificationCode, res) => {
@@ -206,6 +207,23 @@ const verifyAndRegisterUser = async (req, res) => {
     }
 };
 
+// redis auth systems
+// Fungsi untuk menyimpan token sementara di Redis
+const storeTemporaryToken = async (userId, token) => {
+    const key = `temp_token:${userId}`;
+    await redisClient.set(key, token, 'EX', 300); // Expired dalam 5 menit (300 detik)
+};
+// Fungsi untuk mengambil token dari Redis
+const getTemporaryToken = async (userId) => {
+    const key = `temp_token:${userId}`;
+    return await redisClient.get(key);
+};
+// Fungsi untuk menghapus token dari Redis
+const deleteTemporaryToken = async (userId) => {
+    const key = `temp_token:${userId}`;
+    await redisClient.del(key);
+};
+
 const login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -227,13 +245,33 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
-        // Simpan userId di sesi
-        const token = generateToken(user);
+        // Generate session ID yang unik
+        const sessionId = uuidv4();
 
-        return res.status(200).json({ 
-            message: 'Login berhasil, silakan ambil token.',
-            token: token
+        // Simpan data user dengan session ID di Redis
+        const sessionData = {
+            userId: user._id,
+            email: user.email,
+            createdAt: new Date().toISOString()
+        };
+
+        // Simpan di Redis dengan format: session:{sessionId}
+        await redisClient.set(
+            `session:${sessionId}`, 
+            JSON.stringify(sessionData), 
+            'EX', 
+            300 // 5 menit
+        );
+
+        // Set sessionId di cookie (HTTP-Only, Secure)
+        res.cookie('sessionId', sessionId, {
+            httpOnly: true, // Tidak bisa diakses via JavaScript
+            secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
+            sameSite: 'Strict', // Proteksi CSRF
+            maxAge: 180 * 1000 // 3 menit (sesuai expire Redis)
         });
+
+        return res.status(200).json({ message: 'Login berhasil' });
     } catch (error) {
         console.error('Error during login:', error.message);
         return res.status(500).json({ message: 'Kesalahan server' });
@@ -241,16 +279,44 @@ const login = async (req, res) => {
 };
 
 const get_token = async (req, res) => {
-    const userId = req.session.userId;
+    try {
+         // Ambil sessionId dari cookie
+        const sessionId = req.cookies.sessionId;
+        if (!sessionId) {
+            return res.status(401).json({ message: 'Session tidak ditemukan' });
+        }
 
-    if (!userId) {
-        return res.status(401).json({ message: 'User tidak terautentikasi' });
+        // Ambil session data dari Redis
+        const sessionData = await redisClient.get(`session:${sessionId}`);
+        if (!sessionData) {
+            return res.status(401).json({ message: 'Session tidak valid atau kedaluwarsa' });
+        }
+
+        const { userId, email } = JSON.parse(sessionData);
+
+        // Cari user berdasarkan email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'Kredensial tidak valid' });
+        }
+
+        const token = generateToken(user);
+
+        return res.status(200).json({ 
+            message: 'Token berhasil dibuat',
+            token: token
+        });
+    } catch (error) {
+        console.error('Error getting token:', error.message);
+        return res.status(500).json({ 
+            message: 'Kesalahan server saat mengambil token' 
+        });
     }
+};
 
-    // Buat token
-    const token = generateToken(userId); // Fungsi untuk menghasilkan token
-
-    return res.status(200).json({ token });
-}
+const logout = (req, res) => {
+    res.clearCookie('token');
+    return res.status(200).json({ message: 'Logout berhasil' });
+};
 
 module.exports = { login, get_token, register, verifyAndRegisterUser, resendVerificationCode};
