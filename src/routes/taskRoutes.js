@@ -182,20 +182,29 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  * @swagger
  * /tasks:
  *   get:
- *     summary: Mendapatkan semua tugas
+ *     summary: Mendapatkan daftar tugas
+ *     description: Endpoint untuk mengambil daftar tugas dengan filter status dan priority
  *     tags: [Tasks]
  *     security:
  *       - BearerAuth: []
-  *     parameters:
+ *     parameters:
  *       - in: query
  *         name: status
- *         required: false
  *         schema:
  *           type: string
- *           example: "not_completed"
+ *           example: "belum_selesai"
+ *         description: Filter berdasarkan tugas yang belum selesai
+ *         required: false
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [rendah, sedang, tinggi]
+ *         description: Filter berdasarkan prioritas tugas
+ *         required: false
  *     responses:
  *       200:
- *         description: Daftar tugas berhasil diambil.
+ *         description: Daftar tugas berhasil diambil
  *         content:
  *           application/json:
  *             schema:
@@ -211,27 +220,78 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *                     properties:
  *                       _id:
  *                         type: string
+ *                         description: ID unik tugas
  *                         example: "60d5ec49f1a2c8b1f8e4e1a1"
  *                       name:
  *                         type: string
+ *                         description: Nama tugas
  *                         example: "Tugas Matematika"
  *                       detail:
  *                         type: string
+ *                         description: Detail tugas
  *                         example: "Mengerjakan soal halaman 23"
  *                       status:
  *                         type: string
- *                         example: "belum_jalan"
+ *                         description: Status tugas
+ *                         enum: [aktif, pending, selesai]
+ *                         example: "aktif"
  *                       priority:
  *                         type: string
+ *                         description: Prioritas tugas
+ *                         enum: [rendah, sedang, tinggi]
  *                         example: "tinggi"
  *                       deadline:
  *                         type: string
  *                         format: date-time
+ *                         description: Deadline tugas
  *                         example: "2025-02-01T12:00:00Z"
+ *       400:
+ *         description: Parameter tidak valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Priority harus rendah, sedang, atau tinggi"
+ *       401:
+ *         description: Token tidak valid atau tidak ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized: Token tidak valid"
  *       404:
- *         description: Tidak ada tugas ditemukan.
+ *         description: Tidak ada tugas ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tidak ada tugas ditemukan."
  *       500:
- *         description: Kesalahan server.
+ *         description: Kesalahan server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Kesalahan server."
+ * 
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 router.get('/', authenticate, getTasks); // Menggunakan metode GET untuk mendapatkan semua tugas
 
