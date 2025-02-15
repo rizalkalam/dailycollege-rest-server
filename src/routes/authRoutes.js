@@ -200,7 +200,50 @@ router.post('/verify', verifyAndRegisterUser);
  */
 router.post('/login', login);
 
-// router.get('/get-token', get_token)
+/**
+ * @swagger
+ * /auth/get-token:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Mendapatkan token JWT berdasarkan session
+ *     description: Mengambil token JWT berdasarkan session yang valid. Memerlukan sessionId yang disimpan dalam cookie.
+ *     responses:
+ *       200:
+ *         description: Token berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Token berhasil diambil
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       401:
+ *         description: Session tidak ditemukan atau tidak valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Session tidak ditemukan
+ *       500:
+ *         description: Terjadi kesalahan saat mengambil token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Terjadi kesalahan saat mengambil token
+ */
+router.get('/get-token', get_token)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
