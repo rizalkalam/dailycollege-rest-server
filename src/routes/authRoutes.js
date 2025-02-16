@@ -1,8 +1,9 @@
 const express = require('express');
-const { login, get_token, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
+const { login, logout, get_token, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
 const passport = require('passport');
 const router = express.Router();
 const { generateToken } = require('../utils/jwt')
+const authenticate = require('../middlewares/authenticate');
 
 /**
  * @swagger
@@ -243,7 +244,51 @@ router.post('/login', login);
  *                   type: string
  *                   example: Terjadi kesalahan saat mengambil token
  */
-router.get('/get-token', get_token)
+router.get('/get-token', authenticate, get_token)
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Logout user
+ *     description: Invalidate JWT token untuk user tertentu
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout berhasil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout berhasil
+ *       401:
+ *         description: Token tidak valid atau tidak ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Token tidak valid
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Kesalahan server saat logout
+ */
+router.get('/logout', authenticate, logout)
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**

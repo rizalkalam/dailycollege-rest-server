@@ -266,9 +266,9 @@ const login = async (req, res) => {
         // Set sessionId di cookie (HTTP-Only, Secure)
         res.cookie('sessionId', sessionId, {
             httpOnly: true, // Tidak bisa diakses via JavaScript
-            secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
             sameSite: 'Strict', // Proteksi CSRF
             maxAge: 180 * 1000 // 3 menit (sesuai expire Redis)
+            // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
         });
 
         return res.status(200).json({ message: 'Login berhasil' });
@@ -314,9 +314,45 @@ const get_token = async (req, res) => {
     }
 };
 
-const logout = (req, res) => {
-    res.clearCookie('token');
-    return res.status(200).json({ message: 'Logout berhasil' });
+const logout = async (req, res) => {
+    try {
+        const userId = req.user._id; // Pastikan menggunakan userId yang benar dari token
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(400).json({ 
+                message: 'Token tidak ditemukan' 
+            });
+        }
+
+        // Decode token untuk mendapatkan waktu expired
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        
+        // Hitung sisa waktu token (dalam detik)
+        const timeToExpire = decoded.exp - Math.floor(Date.now() / 10);
+        
+        if (timeToExpire > 0) {
+            // Simpan token lengkap di blacklist
+            const blacklistKey = `bl_${userId}_${token}`;
+            await redisClient.set(blacklistKey, 'true', 'EX', timeToExpire);
+            
+            // Log untuk debugging
+            console.log('Token blacklisted:', blacklistKey);
+            
+            // Verifikasi token berhasil disimpan
+            const isBlacklisted = await redisClient.get(blacklistKey);
+            console.log('Verification after blacklisting:', isBlacklisted);
+        }
+
+        res.status(200).json({ 
+            message: 'Logout berhasil' 
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ 
+            message: 'Kesalahan server saat logout' 
+        });
+    }
 };
 
-module.exports = { login, get_token, register, verifyAndRegisterUser, resendVerificationCode};
+module.exports = { login, logout, get_token, register, verifyAndRegisterUser, resendVerificationCode};

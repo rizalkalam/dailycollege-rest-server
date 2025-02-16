@@ -1,4 +1,5 @@
 const CalendarEvent = require('../models/CalendarEvent');
+const Color = require('../models/Color');
 
 const getCalendar = async (req, res) => {
     try {
@@ -15,6 +16,7 @@ const getCalendar = async (req, res) => {
             title: calendar.title,
             startDate: calendar.startDate.toISOString().split('T')[0], // Format YYYY-MM-DD
             endDate: calendar.endDate.toISOString().split('T')[0], // Format YYYY-MM-DD
+            reminderTime: calendar.reminderTime,
             color_accents: {
                 color_id: calendar.color_id.id,        
                 color_name: calendar.color_id.color_name,
@@ -141,6 +143,14 @@ const addCalendar = async (req, res) => {
             });
         }
 
+        // Validasi color_id
+        const existingColor = await Color.findById(color_id);
+        if (!existingColor) {
+            return res.status(400).json({
+                message: 'Color ID tidak ditemukan.',
+            });
+        }
+
         // Buat objek baru untuk CalendarEvent
         const newEvent = new CalendarEvent({
             user_id: userId,
@@ -175,6 +185,14 @@ const editCalenderById = async (req, res) => {
     try {
         const { id } = req.params
         const { title, startDate, endDate, startTime, endTime, note, location, reminderTime, color_id } = req.body; // Ambil data dari body request
+
+        // Validasi color_id
+        const existingColor = await Color.findById(color_id);
+        if (!existingColor) {
+            return res.status(400).json({
+                message: 'Color ID tidak valid.',
+            });
+        }
 
         // Cari dan update data kalender berdasarkan ID dan user_id
         const updatedCalendar = await CalendarEvent.findByIdAndUpdate(
