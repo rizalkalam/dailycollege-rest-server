@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const redisClient = require('../config/redisClient');
 
 const authenticate = async (req, res, next) => {
      // Ambil token dari header Authorization
@@ -18,21 +19,25 @@ const authenticate = async (req, res, next) => {
          if (!decoded.id) {
              return res.status(401).json({ message: 'Token tidak valid: tidak ada id.' });
          }
- 
-         // Cari pengguna di database berdasarkan `id` yang ada di token
-         const user = await User.findById(decoded.id);
-         if (!user) {
-             return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
-         }
+
+         const userId = decoded.id;
+
+         // Cek apakah token aktif ada di Redis
+        const authKey = `user:${userId._id}:${token}`; // <-- Sesuaikan format key
+        const isAuth = await redisClient.get(authKey);
+        
+        if (!isAuth) {
+            return res.status(401).json({ message: 'Kode autentikasi anda salah/expired' });
+        }
  
          // Simpan data pengguna ke dalam req.user
-         req.user = user;
+         req.user = userId;
+         req.token = token;
  
          // Lanjutkan ke route handler berikutnya
          next();
      } catch (err) {
-         // Jika token tidak valid atau kadaluarsa, beri respons error
-         return res.status(401).json({ message: 'Kode autentikasi anda salah/expired', error: err.message });
+        return res.status(401).json({ message: 'Kode autentikasi anda salah/expired', error: err.message });
      }
 };
 

@@ -9,6 +9,7 @@ const dayRoutes = require('./routes/dayRoutes');
 const courseScheduleRoutes = require('./routes/courseScheduleRoutes');
 const colorRoutes = require('./routes/colorRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
+const financeRoutes = require('./routes/financeRoutes');
 const freshRoutes = require('./routes/freshRoutes')
 const session = require('express-session'); // Pastikan 'express-session' diimpor
 const dotenv = require('dotenv');
@@ -61,7 +62,8 @@ app.use('/days', dayRoutes);
 app.use('/course-schedule', courseScheduleRoutes);
 app.use('/colors', colorRoutes);
 app.use('/calendar', calendarRoutes);
-app.use('/fresh', freshRoutes)
+app.use('/finance', financeRoutes);
+app.use('/fresh', freshRoutes);
 
 // welcome page
 app.get('/', (req, res) => {

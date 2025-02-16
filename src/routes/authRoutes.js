@@ -248,7 +248,7 @@ router.get('/get-token', get_token)
 
 /**
  * @swagger
- * /api/auth/logout:
+ * /auth/logout:
  *   get:
  *     tags:
  *       - Authentication
@@ -256,7 +256,7 @@ router.get('/get-token', get_token)
  *     description: Invalidate JWT token untuk user tertentu
  *     security:
  *       - BearerAuth: []
- *     responses:
+  *     responses:
  *       200:
  *         description: Logout berhasil
  *         content:
@@ -267,8 +267,8 @@ router.get('/get-token', get_token)
  *                 message:
  *                   type: string
  *                   example: Logout berhasil
- *       401:
- *         description: Token tidak valid atau tidak ditemukan
+ *       400:
+ *         description: Token tidak ditemukan
  *         content:
  *           application/json:
  *             schema:
@@ -276,9 +276,9 @@ router.get('/get-token', get_token)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Token tidak valid
+ *                   example: Token tidak ditemukan
  *       500:
- *         description: Server error
+ *         description: Terjadi kesalahan saat logout
  *         content:
  *           application/json:
  *             schema:

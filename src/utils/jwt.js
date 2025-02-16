@@ -11,8 +11,8 @@ const generateToken = async (userId) => {
     );
 
     // Simpan token ke Redis dengan waktu expired yang sama
-    const redisKey = `user:${userId}:tokens`;
-    await redisClient.sadd(redisKey, token);
+    const redisKey = `user:${userId._id}:${token}`;
+    await redisClient.set(redisKey, token);
     await redisClient.expire(redisKey, 7 * 24 * 60 * 60); // Sesuaikan dengan expiresIn (7 hari)
 
     return token;

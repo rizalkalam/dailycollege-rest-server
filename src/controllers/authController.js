@@ -318,22 +318,17 @@ const get_token = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-
-    if (!token) {
-        return res.status(400).json({ message: 'Token tidak ditemukan' });
-    }
-
     try {
-        // Verifikasi token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY || 'mysecretkey12345!@#security');
-        const userId = decoded.id;
+        const userId = req.user._id; // Ambil dari req.user
+        const token = req.headers['authorization']?.replace('Bearer ', '');
 
-        // Hapus token dari Redis
-        const redisKey = `user:${userId}:tokens`;
-        await redisClient.srem(redisKey, token);
+        if (!token) {
+            return res.status(400).json({ message: 'Token tidak ditemukan' });
+        }
 
-        return res.status(200).json({ message: 'Logout berhasil' });
+        await redisClient.del(`user:${userId}:${token}`);
+
+        res.status(200).json({ message: 'Logout berhasil' });
     } catch (error) {
         console.error('Error during logout:', error.message);
         return res.status(500).json({ message: 'Kesalahan server saat logout' });
