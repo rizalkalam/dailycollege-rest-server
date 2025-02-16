@@ -192,8 +192,8 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *         name: status
  *         schema:
  *           type: string
- *           example: "belum_selesai"
- *         description: Filter berdasarkan tugas yang belum selesai
+ *           enum: [belum_jalan, sedang_jalan, dalam_antrian, selesai]
+ *         description: Filter berdasarkan status tugas
  *         required: false
  *       - in: query
  *         name: priority
@@ -202,6 +202,11 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *           enum: [rendah, sedang, tinggi]
  *         description: Filter berdasarkan prioritas tugas
  *         required: false
+ *       - name: search
+ *         in: query
+ *         description: Pencarian tugas berdasarkan nama atau detail (case-insensitive).
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Daftar tugas berhasil diambil

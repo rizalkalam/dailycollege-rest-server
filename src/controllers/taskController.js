@@ -2,7 +2,7 @@ const Task = require("../models/Task");
 
 const getTasks = async (req, res) => {
     try {
-        const { status, priority } = req.query; // Mengambil parameter status dari query
+        const { status, priority, search } = req.query; // Mengambil parameter status dari query
 
         let tasks;
 
@@ -11,7 +11,12 @@ const getTasks = async (req, res) => {
 
         // Jika parameter status ada dan tidak kosong, filter berdasarkan status
         if (status) {
-            filter.status = { $ne: 'selesai' };
+            if (!['belum_jalan', 'sedang_jalan', 'dalam_antrian', 'selesai'].includes(status)) {
+                return res.status(400).json({ 
+                    message: 'Status harus belum_jalan, sedang_jalan, dalam_antrian atau selesai' 
+                });
+            }
+            filter.status = status;
         }
 
         // Jika parameter priority ada, validasi dan tambahkan ke filter
@@ -23,6 +28,14 @@ const getTasks = async (req, res) => {
             }
             filter.priority = priority;
         }
+
+        // Fitur pencarian
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } } // Case-insensitive search di field name
+            ];
+        }
+
 
         // Mengambil tasks dengan filter
         tasks = await Task.find(filter).populate('user_id');
