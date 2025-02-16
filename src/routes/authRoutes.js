@@ -244,7 +244,7 @@ router.post('/login', login);
  *                   type: string
  *                   example: Terjadi kesalahan saat mengambil token
  */
-router.get('/get-token', authenticate, get_token)
+router.get('/get-token', get_token)
 
 /**
  * @swagger
