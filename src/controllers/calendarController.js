@@ -99,7 +99,7 @@ const getCalendarById = async (req, res) => {
         const { id } = req.params
 
         // Cari data kalender berdasarkan ID
-        const calendar = await CalendarEvent.findById(id)
+        const calendar = await CalendarEvent.findById(id).populate('color_id')
 
         // Jika tidak ditemukan, kirimkan respons 404
         if (!calendar) {
@@ -121,6 +121,11 @@ const getCalendarById = async (req, res) => {
                 note: calendar.note,
                 location: calendar.location,
                 reminderTime: calendar.reminderTime,
+                color_accents: {
+                    color_id: calendar.color_id._id,
+                    color_name: calendar.color_id.color_name,
+                    color_value: calendar.color_id.color_value,
+                },
             },
         });
     } catch (error) {

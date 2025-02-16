@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');  // Mengimpor jsonwebtoken
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
-const { generateToken, generateRefreshToken, validateRefreshToken, revokeRefreshToken } = require('../utils/jwt')
+const { generateToken, revokeToken } = require('../utils/jwt')
 const emailValidator = require('email-validator');
 const redisClient = require('../config/redisClient')
 const profile = require("nodemailer/lib/smtp-connection");
@@ -300,7 +300,10 @@ const get_token = async (req, res) => {
             return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
-        const token = generateToken(user);
+        const token = await generateToken(user);
+
+        // Hapus session dari Redis
+        // await redisClient.del(`session:${sessionId}`);        
 
         return res.status(200).json({ 
             message: 'Token berhasil dibuat',
@@ -315,43 +318,25 @@ const get_token = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+
+    if (!token) {
+        return res.status(400).json({ message: 'Token tidak ditemukan' });
+    }
+
     try {
-        const userId = req.user._id; // Pastikan menggunakan userId yang benar dari token
-        const token = req.headers.authorization?.split(' ')[1];
+        // Verifikasi token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY || 'mysecretkey12345!@#security');
+        const userId = decoded.id;
 
-        if (!token) {
-            return res.status(400).json({ 
-                message: 'Token tidak ditemukan' 
-            });
-        }
+        // Hapus token dari Redis
+        const redisKey = `user:${userId}:tokens`;
+        await redisClient.srem(redisKey, token);
 
-        // Decode token untuk mendapatkan waktu expired
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        
-        // Hitung sisa waktu token (dalam detik)
-        const timeToExpire = decoded.exp - Math.floor(Date.now() / 10);
-        
-        if (timeToExpire > 0) {
-            // Simpan token lengkap di blacklist
-            const blacklistKey = `bl_${userId}_${token}`;
-            await redisClient.set(blacklistKey, 'true', 'EX', timeToExpire);
-            
-            // Log untuk debugging
-            console.log('Token blacklisted:', blacklistKey);
-            
-            // Verifikasi token berhasil disimpan
-            const isBlacklisted = await redisClient.get(blacklistKey);
-            console.log('Verification after blacklisting:', isBlacklisted);
-        }
-
-        res.status(200).json({ 
-            message: 'Logout berhasil' 
-        });
+        return res.status(200).json({ message: 'Logout berhasil' });
     } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({ 
-            message: 'Kesalahan server saat logout' 
-        });
+        console.error('Error during logout:', error.message);
+        return res.status(500).json({ message: 'Kesalahan server saat logout' });
     }
 };
 
