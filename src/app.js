@@ -24,12 +24,12 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://dailycollege.vercel.app'],
+    origin: ['https://dailycollege.testingfothink.my.id', 'https://dailycollege.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type'],  // Pastikan Authorization ada di sini
     credentials: true,  // Jika perlu
 };
-app.use(cors(corsOptions)); // Jika menggunakan CORS
+app.use('*', cors(corsOptions)); // Jika menggunakan CORS
 
 // Middleware untuk body parser (untuk menerima data POST)
 app.use(express.urlencoded({ extended: true }));
