@@ -10,7 +10,7 @@ const sessionConfig = {
   resave: false,
   saveUninitialized: false,
   cookie: { 
-        secure: false,
+        secure: true,
         sameSite: 'None',
         httpOnly: true,
         maxAge: 5 * 60 * 1000,  // session expires after 5 minutes
