@@ -11,7 +11,7 @@ const sessionConfig = {
   saveUninitialized: false,
   cookie: { 
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: 'None',
         httpOnly: true,
         maxAge: 5 * 60 * 1000,  // session expires after 5 minutes
         domain: '.testingfothink.my.id'
