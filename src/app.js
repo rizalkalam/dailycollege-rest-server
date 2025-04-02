@@ -47,9 +47,19 @@ const corsOptions = {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
       credentials: true,
+      exposedHeaders: ['set-cookie'],
       optionsSuccessStatus: 200 // Untuk browser lama
 };
-app.use('*', cors(corsOptions)); // Jika menggunakan CORS
+
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://dailycollege.testingfothink.my.id',
+        'https://dailycollege.vercel.app'
+      ],
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization'
+}));
 
 // Middleware untuk body parser (untuk menerima data POST)
 app.use(express.urlencoded({ extended: true }));
