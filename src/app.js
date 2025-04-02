@@ -47,6 +47,7 @@ const corsOptions = {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
       credentials: true,
+      exposedHeaders: ['set-cookie'],
       optionsSuccessStatus: 200 // Untuk browser lama
 };
 app.use('*', cors(corsOptions)); // Jika menggunakan CORS

@@ -8,9 +8,10 @@ const sessionConfig = {
   store: new RedisStore({ client: redisClient }), // redisClient sudah berupa objek yang terhubung ke Redis
   secret: 'yourSecretKey',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: { 
-        secure: false, // set ke true jika menggunakan https
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         httpOnly: true,
         maxAge: 5 * 60 * 1000  // session expires after 5 minutes
     }
