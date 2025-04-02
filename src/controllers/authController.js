@@ -265,8 +265,8 @@ const login = async (req, res) => {
 
         // Set sessionId di cookie (HTTP-Only, Secure)
         res.cookie('sessionId', sessionId, {
-            httpOnly: true, // Tidak bisa diakses via JavaScript
-            secure: false,
+            httpOnly: false, // Tidak bisa diakses via JavaScript
+            secure: true,
             sameSite: "None", // Proteksi CSRF
             maxAge: 180 * 1000 // 3 menit (sesuai expire Redis)
             // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production

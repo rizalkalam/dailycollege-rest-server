@@ -25,32 +25,16 @@ const app = express();
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Izinkan semua origin atau sesuaikan dengan kebutuhan
-        const allowedOrigins = [
-          'http://localhost:3000',
-          'https://dailycollege.testingfothink.my.id',
-          'https://dailycollege.vercel.app'
-        ];
-        
-        // Untuk development: izinkan semua origin (termasuk undefined/Postman)
-        if (process.env.NODE_ENV === 'development' || !origin) {
-          return callback(null, true);
-        }
-    
-        // Untuk production: cek daftar origin yang diizinkan
-        if (allowedOrigins.indexOf(origin) !== -1) {
-          callback(null, true);
+        if (origin === "http://localhost:3000" || origin === "https://1d38-2001-448a-404d-7ab8-e8a0-2d3a-7337-bd65.ngrok-free.app") {
+          callback(null, true); // Mengizinkan request dari HTTP dan HTTPS
         } else {
-          callback(new Error('Origin tidak diizinkan oleh kebijakan CORS'));
+          callback(new Error("Not allowed by CORS"));
         }
       },
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
-      credentials: true,
-      exposedHeaders: ['set-cookie'],
-      optionsSuccessStatus: 200 // Untuk browser lama
+      credentials: true, // Mengizinkan pengiriman cookies/session
 };
-app.use('*', cors(corsOptions)); // Jika menggunakan CORS
+
+app.use(cors(corsOptions));
 
 // Middleware untuk body parser (untuk menerima data POST)
 app.use(express.urlencoded({ extended: true }));
