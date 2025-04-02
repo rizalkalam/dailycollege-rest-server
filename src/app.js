@@ -24,10 +24,30 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: ['https://dailycollege.testingfothink.my.id', 'https://dailycollege.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Authorization', 'Content-Type'],  // Pastikan Authorization ada di sini
-    credentials: true,  // Jika perlu
+    origin: (origin, callback) => {
+        // Izinkan semua origin atau sesuaikan dengan kebutuhan
+        const allowedOrigins = [
+          'http://localhost:3000',
+          'https://dailycollege.testingfothink.my.id',
+          'https://dailycollege.vercel.app'
+        ];
+        
+        // Untuk development: izinkan semua origin (termasuk undefined/Postman)
+        if (process.env.NODE_ENV === 'development' || !origin) {
+          return callback(null, true);
+        }
+    
+        // Untuk production: cek daftar origin yang diizinkan
+        if (allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, true);
+        } else {
+          callback(new Error('Origin tidak diizinkan oleh kebijakan CORS'));
+        }
+      },
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+      credentials: true,
+      optionsSuccessStatus: 200 // Untuk browser lama
 };
 app.use('*', cors(corsOptions)); // Jika menggunakan CORS
 
