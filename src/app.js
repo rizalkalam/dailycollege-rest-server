@@ -25,13 +25,14 @@ const app = express();
 
 const corsOptions = {
     origin: (origin, callback) => {
-        if (origin === "http://localhost:3000" || origin === "https://dailycollege.testingfothink.my.id") {
-          callback(null, true); // Mengizinkan request dari HTTP dan HTTPS
+        const allowedOrigins = ["http://localhost:3000", "https://dailycollege.testingfothink.my.id"];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
         } else {
-          callback(new Error("Not allowed by CORS"));
+            callback(new Error("Not allowed by CORS"));
         }
-      },
-      credentials: true, // Mengizinkan pengiriman cookies/session
+    },
+    credentials: true, // Mengizinkan cookies/session
 };
 
 app.use(cors(corsOptions));
