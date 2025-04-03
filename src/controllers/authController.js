@@ -245,6 +245,8 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Kredensial tidak valid' });
         }
 
+        const token = await generateToken(user);
+
         // Generate session ID yang unik
         const sessionId = uuidv4();
 
@@ -252,6 +254,7 @@ const login = async (req, res) => {
         const sessionData = {
             userId: user._id,
             email: user.email,
+            token: token,
             createdAt: new Date().toISOString()
         };
 
@@ -260,7 +263,7 @@ const login = async (req, res) => {
             `session:${sessionId}`, 
             JSON.stringify(sessionData), 
             'EX', 
-            300 // 5 menit
+            604800 // 7 hari dalam detik
         );
 
         // Set sessionId di cookie (HTTP-Only, Secure)
@@ -268,7 +271,7 @@ const login = async (req, res) => {
             httpOnly: false, // Tidak bisa diakses via JavaScript
             secure: true,
             sameSite: "None", // Proteksi CSRF
-            maxAge: 180 * 1000 // 3 menit (sesuai expire Redis)
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
             // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
         });
 
@@ -293,18 +296,7 @@ const get_token = async (req, res) => {
             return res.status(401).json({ message: 'Session tidak valid atau kedaluwarsa' });
         }
 
-        const { userId, email } = JSON.parse(sessionData);
-
-        // Cari user berdasarkan email
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'Kredensial tidak valid' });
-        }
-
-        const token = await generateToken(user);
-
-        // Hapus session dari Redis
-        // await redisClient.del(`session:${sessionId}`);        
+        const { userId, email, token } = JSON.parse(sessionData);
 
         return res.status(200).json({ 
             message: 'Token berhasil dibuat',
