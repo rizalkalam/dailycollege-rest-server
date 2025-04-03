@@ -25,7 +25,7 @@ const app = express();
 
 const corsOptions = {
     origin: (origin, callback) => {
-        if (origin === "http://localhost:3000" || origin === "https://dailycollege.testingfothink.my.id/") {
+        if (origin === "http://localhost:3000" || origin === "https://dailycollege.testingfothink.my.id") {
           callback(null, true); // Mengizinkan request dari HTTP dan HTTPS
         } else {
           callback(new Error("Not allowed by CORS"));
