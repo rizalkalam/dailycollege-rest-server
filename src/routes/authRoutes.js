@@ -207,11 +207,11 @@ router.post('/login', login);
  *   get:
  *     tags:
  *       - Authentication
- *     summary: Mendapatkan token JWT berdasarkan session
- *     description: Mengambil token JWT berdasarkan session yang valid. Memerlukan sessionId yang disimpan dalam cookie.
+ *     summary: Mendapatkan token akses
+ *     description: Mengembalikan token JWT yang terkait dengan session yang aktif
  *     responses:
  *       200:
- *         description: Token berhasil diambil
+ *         description: Successfully retrieved token
  *         content:
  *           application/json:
  *             schema:
@@ -219,12 +219,28 @@ router.post('/login', login);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Token berhasil diambil
+ *                   example: Token berhasil dibuat
  *                 token:
  *                   type: string
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 expires_at:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-04-10T14:30:00.000Z"
+ *                 expires_in:
+ *                   type: integer
+ *                   example: 604800
+ *                 expiration_info:
+ *                   type: object
+ *                   properties:
+ *                     date:
+ *                       type: string
+ *                       example: "Rabu, 10 April 2024"
+ *                     time:
+ *                       type: string
+ *                       example: "14.30 WIB"
  *       401:
- *         description: Session tidak ditemukan atau tidak valid
+ *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
@@ -232,9 +248,9 @@ router.post('/login', login);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Session tidak ditemukan
+ *                   example: Session tidak valid atau kedaluwarsa
  *       500:
- *         description: Terjadi kesalahan saat mengambil token
+ *         description: Internal Server Error
  *         content:
  *           application/json:
  *             schema:
@@ -242,7 +258,9 @@ router.post('/login', login);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Terjadi kesalahan saat mengambil token
+ *                   example: Kesalahan server saat mengambil token
+ *     security:
+ *       - cookieAuth: []
  */
 router.get('/get-token', get_token)
 
@@ -256,7 +274,7 @@ router.get('/get-token', get_token)
  *     description: Invalidate JWT token untuk user tertentu
  *     security:
  *       - BearerAuth: []
-  *     responses:
+ *     responses:
  *       200:
  *         description: Logout berhasil
  *         content:
