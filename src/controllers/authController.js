@@ -252,8 +252,6 @@ const login = async (req, res) => {
 
         // Simpan data user dengan session ID di Redis
         const sessionData = {
-            userId: user._id,
-            email: user.email,
             token: token,
             createdAt: new Date().toISOString()
         };
@@ -296,11 +294,39 @@ const get_token = async (req, res) => {
             return res.status(401).json({ message: 'Session tidak valid atau kedaluwarsa' });
         }
 
-        const { userId, email, token } = JSON.parse(sessionData);
+        const { token, createdAt } = JSON.parse(sessionData);
+
+        // Decode token untuk mendapatkan expiration time
+        const decodedToken = jwt.decode(token);
+        if (!decodedToken || !decodedToken.exp) {
+            throw new Error('Invalid token structure');
+        }
+
+        // Konversi UNIX timestamp ke Date
+        const expiresAt = new Date(decodedToken.exp * 1000);
+        
+        // Hitung waktu tersisa dalam detik
+        const now = Math.floor(Date.now() / 1000);
+        const expiresIn = decodedToken.exp - now;
 
         return res.status(200).json({ 
             message: 'Token berhasil dibuat',
-            token: token
+            token: token,
+            expires_at: expiresAt.toISOString(),
+            expires_in: expiresIn,
+            expiration_info: {
+                date: expiresAt.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }),
+                time: expiresAt.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                })
+            }
         });
     } catch (error) {
         console.error('Error getting token:', error.message);

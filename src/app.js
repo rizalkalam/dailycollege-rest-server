@@ -25,7 +25,7 @@ const app = express();
 
 const corsOptions = {
     origin: (origin, callback) => {
-        const allowedOrigins = ["http://localhost:3000", "https://dailycollege.testingfothink.my.id"];
+        const allowedOrigins = ["http://localhost:3000", "https://dailycollege.testingfothink.my.id", "https://dailycollege.vercel.app"];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
