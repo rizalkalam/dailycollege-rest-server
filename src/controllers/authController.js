@@ -261,7 +261,8 @@ const login = async (req, res) => {
             `session:${sessionId}`, 
             JSON.stringify(sessionData), 
             'EX', 
-            604800 // 7 hari dalam detik
+            180 // 3 menit dalam detik
+            // 604800 // 7 hari dalam detik
         );
 
         // Set sessionId di cookie (HTTP-Only, Secure)
@@ -269,7 +270,8 @@ const login = async (req, res) => {
             httpOnly: false, // Tidak bisa diakses via JavaScript
             secure: true,
             sameSite: "None", // Proteksi CSRF
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
+            maxAge: 3 * 60 * 1000 // 3 menit dalam milidetik
+            // maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
             // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
         });
 
