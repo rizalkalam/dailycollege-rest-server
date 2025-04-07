@@ -98,13 +98,13 @@ const getTaskProgress = async (req, res) => {
         const progressWithSymbol = `${progressPercentage}%`;
 
         res.status(200).json({
-            message: 'Statistik tugas berhasil diambil.',
+            pesan: 'Statistik tugas berhasil diambil.',
             data: {
                 total: totalTasks,
-                completed: completedTasks,
-                progress: progressWithSymbol
+                selesai: completedTasks,
+                progres: progressWithSymbol
             }
-        });
+        });        
     } catch (error) {
         console.error('Kesalahan mengambil statistik:', error);
         res.status(500).json({ message: 'Kesalahan server' });
