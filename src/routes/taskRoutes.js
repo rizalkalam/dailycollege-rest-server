@@ -304,27 +304,42 @@ router.get('/', authenticate, getTasks); // Menggunakan metode GET untuk mendapa
  * @swagger
  * /tasks/progress:
  *   get:
- *     summary: Mendapatkan statistik progress tugas user
- *     tags: [Progress]
+ *     summary: Mendapatkan statistik progres tugas pengguna
+ *     tags: [Progres]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Success
+ *         description: Statistik tugas berhasil diambil.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 pesan:
  *                   type: string
+ *                   example: Statistik tugas berhasil diambil.
  *                 data:
- *                   $ref: '#/components/schemas/Progress'
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 10
+ *                       description: Jumlah seluruh tugas
+ *                     selesai:
+ *                       type: integer
+ *                       example: 7
+ *                       description: Jumlah tugas yang telah diselesaikan
+ *                     progres:
+ *                       type: string
+ *                       example: "70%"
+ *                       description: Persentase progres penyelesaian tugas
  *       401:
- *         description: Unauthorized
+ *         description: Tidak terautentikasi (Unauthorized)
  *       500:
- *         description: Server error
+ *         description: Terjadi kesalahan pada server
  */
+
 router.get('/progress', authenticate, getTaskProgress);
 
 /**
