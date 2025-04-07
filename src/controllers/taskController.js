@@ -79,6 +79,38 @@ const getTaskById = async (req, res) => {
     }
 };
 
+const getTaskProgress = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Hitung statistik
+        const totalTasks = await Task.countDocuments({ user_id: userId });
+        const completedTasks = await Task.countDocuments({ 
+            user_id: userId,
+            status: 'selesai' 
+        });
+
+        // Format persentase
+        const progressPercentage = totalTasks > 0 
+            ? Math.round((completedTasks / totalTasks) * 100)
+            : 0;
+            
+        const progressWithSymbol = `${progressPercentage}%`;
+
+        res.status(200).json({
+            message: 'Statistik tugas berhasil diambil.',
+            data: {
+                total: totalTasks,
+                completed: completedTasks,
+                progress: progressWithSymbol
+            }
+        });
+    } catch (error) {
+        console.error('Kesalahan mengambil statistik:', error);
+        res.status(500).json({ message: 'Kesalahan server' });
+    }
+};
+
 const createTask = async (req, res) => {
     try {
         const { name, detail, status, priority, deadline } = req.body;
@@ -166,4 +198,4 @@ const deleteTask = async (req, res) => {
     }
 };
 
-module.exports = { getTasks, getTaskById, createTask, editTask, deleteTask }
+module.exports = { getTasks, getTaskById, getTaskProgress, createTask, editTask, deleteTask }

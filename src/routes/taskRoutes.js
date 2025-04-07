@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createTask, editTask, deleteTask, getTasks, getTaskById } = require('../controllers/taskController'); // Ganti dengan path yang sesuai
+const { createTask, editTask, deleteTask, getTasks, getTaskById, getTaskProgress } = require('../controllers/taskController'); // Ganti dengan path yang sesuai
 const authenticate = require('../middlewares/authenticate');
 
 /**
@@ -299,6 +299,33 @@ router.delete('/:id', authenticate, deleteTask); // Menggunakan metode DELETE un
  *       bearerFormat: JWT
  */
 router.get('/', authenticate, getTasks); // Menggunakan metode GET untuk mendapatkan semua tugas
+
+/**
+ * @swagger
+ * /tasks/progress:
+ *   get:
+ *     summary: Mendapatkan statistik progress tugas user
+ *     tags: [Progress]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Progress'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/progress', authenticate, getTaskProgress);
 
 /**
  * @swagger
