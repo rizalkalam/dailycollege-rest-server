@@ -7,13 +7,13 @@ const generateToken = async (userId) => {
     const token = jwt.sign(
         { id: userId },
         process.env.JWT_SECRET_KEY || 'mysecretkey12345!@#security',
-        { expiresIn: '7d' }
+        { expiresIn: '3d' }
     );
 
     // Simpan token ke Redis dengan waktu expired yang sama
     const redisKey = `user:${userId._id}:${token}`;
     await redisClient.set(redisKey, token);
-    await redisClient.expire(redisKey, 7 * 24 * 60 * 60); // Sesuaikan dengan expiresIn (7 hari)
+    await redisClient.expire(redisKey, 3 * 24 * 60 * 60 * 1000); // Sesuaikan dengan expiresIn (7 hari)
 
     return token;
 };
