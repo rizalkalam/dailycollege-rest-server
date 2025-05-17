@@ -267,11 +267,17 @@ const login = async (req, res) => {
 
         // Set sessionId di cookie (HTTP-Only, Secure)
         res.cookie('sessionId', sessionId, {
-            httpOnly: false, // Tidak bisa diakses via JavaScript
-            secure: true,
-            sameSite: "None", // Proteksi CSRF
-            maxAge: 3 * 24 * 60 * 60 * 1000 // 7 hari
-            // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
+            // httpOnly: false, // Tidak bisa diakses via JavaScript
+            // secure: true,
+            // sameSite: "None", // Proteksi CSRF
+            // maxAge: 3 * 24 * 60 * 60 * 1000 // 7 hari
+            // // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
+
+            // ios browser access
+            httpOnly: true, // Tidak bisa diakses via JavaScript
+            secure: process.env.NODE_ENV === 'production', // Gunakan secure hanya di production
+            sameSite: 'Lax', // Lebih kompatibel dengan browser iOS
+            maxAge: 3 * 24 * 60 * 60 * 1000 // 3 hari
         });
 
         return res.status(200).json({ message: 'Login berhasil' });
