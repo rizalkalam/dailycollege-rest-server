@@ -275,7 +275,7 @@ const login = async (req, res) => {
 
             // ios browser access
             httpOnly: true, // Tidak bisa diakses via JavaScript
-            secure: process.env.NODE_ENV === 'production', // Gunakan secure hanya di production
+            secure: true, // Gunakan secure hanya di production
             sameSite: 'Lax', // Lebih kompatibel dengan browser iOS
             maxAge: 3 * 24 * 60 * 60 * 1000 // 3 hari
         });
