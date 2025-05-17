@@ -261,36 +261,39 @@ const login = async (req, res) => {
             `session:${sessionId}`, 
             JSON.stringify(sessionData), 
             'EX', 
-            259200 // 3 menit dalam detik
-            // 604800 // 7 hari dalam detik
+            259200 // 3 hari dalam detik
         );
 
         // Set sessionId di cookie (HTTP-Only, Secure)
         res.cookie('sessionId', sessionId, {
-            // httpOnly: false, // Tidak bisa diakses via JavaScript
-            // secure: true,
-            // sameSite: "None", // Proteksi CSRF
-            // maxAge: 3 * 24 * 60 * 60 * 1000 // 7 hari
-            // // secure: process.env.NODE_ENV === 'production', // Hanya dikirim via HTTPS di production
-
-            // ios browser access
-            httpOnly: true, // Tidak bisa diakses via JavaScript
-            secure: true, // Gunakan secure hanya di production
-            sameSite: 'None', // Lebih kompatibel dengan browser iOS
+            httpOnly: true,
+            secure: true, 
+            sameSite: 'None',
             maxAge: 3 * 24 * 60 * 60 * 1000 // 3 hari
         });
 
-        return res.status(200).json({ message: 'Login berhasil' });
+        // Tambahkan sessionId dalam response body sebagai fallback
+        return res.status(200).json({ 
+            message: 'Login berhasil',
+            sessionId: sessionId // Menambahkan sessionId dalam response
+        });
     } catch (error) {
         console.error('Error during login:', error.message);
         return res.status(500).json({ message: 'Kesalahan server' });
     }
 };
 
+// Perlu modifikasi get_token untuk menerima sessionId dari body juga
 const get_token = async (req, res) => {
     try {
-         // Ambil sessionId dari cookie
-        const sessionId = req.cookies.sessionId;
+        // Ambil sessionId dari cookie atau dari body request
+        let sessionId = req.cookies.sessionId;
+        
+        // Jika tidak ada di cookie, coba ambil dari body request
+        if (!sessionId && req.body.sessionId) {
+            sessionId = req.body.sessionId;
+        }
+        
         if (!sessionId) {
             return res.status(401).json({ message: 'Session tidak ditemukan' });
         }
