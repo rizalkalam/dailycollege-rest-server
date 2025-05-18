@@ -169,7 +169,7 @@ router.post('/verify', verifyAndRegisterUser);
  *     tags:
  *       - Authentication
  *     summary: Login user
- *     description: Authenticate user and return a token.
+ *     description: Autentikasi user dan mengembalikan sessionId jika berhasil login.
  *     requestBody:
  *       required: true
  *       content:
@@ -185,7 +185,7 @@ router.post('/verify', verifyAndRegisterUser);
  *                 example: password123
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Login berhasil
  *         content:
  *           application/json:
  *             schema:
@@ -193,11 +193,40 @@ router.post('/verify', verifyAndRegisterUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Login berhasil, silakan ambil token.
+ *                   example: Login berhasil
+ *                 sessionId:
+ *                   type: string
+ *                   example: "7b7fa5c9-810d-40b5-a8b5-4f00f8a157e7"
  *       401:
- *         description: Invalid credentials
+ *         description: Kredensial tidak valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Email atau password salah
+ *       403:
+ *         description: Akun belum diverifikasi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Akun belum diverifikasi, silakan cek email Anda.
  *       500:
- *         description: Server error
+ *         description: Kesalahan server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Terjadi kesalahan pada server
  */
 router.post('/login', login);
 
@@ -208,7 +237,18 @@ router.post('/login', login);
  *     tags:
  *       - Authentication
  *     summary: Mendapatkan token akses
- *     description: Mengembalikan token JWT yang terkait dengan session yang aktif
+ *     description: Mengembalikan token JWT yang terkait dengan session yang aktif. Untuk browser iOS, dapat mengirimkan sessionId melalui request body (opsional).
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sessionId:
+ *                 type: string
+ *                 example: "f121a880-e23a-49d5-b60e-e082397aa26e"
+ *                 description: Session ID yang didapatkan saat login, digunakan khusus untuk browser iOS.
  *     responses:
  *       200:
  *         description: Successfully retrieved token
