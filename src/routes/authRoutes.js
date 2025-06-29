@@ -237,18 +237,15 @@ router.post('/login', login);
  *     tags:
  *       - Authentication
  *     summary: Mendapatkan token akses
- *     description: Mengembalikan token JWT yang terkait dengan session yang aktif. Untuk browser iOS, dapat mengirimkan sessionId melalui request body (opsional).
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               sessionId:
- *                 type: string
- *                 example: "f121a880-e23a-49d5-b60e-e082397aa26e"
- *                 description: Session ID yang didapatkan saat login, digunakan khusus untuk browser iOS.
+ *     description: Mengembalikan token JWT yang terkait dengan session yang aktif. Untuk browser iOS, sessionId dapat dikirim melalui query parameter.
+ *     parameters:
+ *       - in: query
+ *         name: sessionId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Session ID yang didapatkan saat login, digunakan khusus untuk browser iOS
+ *         example: f121a880-e23a-49d5-b60e-e082397aa26e
  *     responses:
  *       200:
  *         description: Successfully retrieved token

@@ -286,12 +286,12 @@ const login = async (req, res) => {
 // Perlu modifikasi get_token untuk menerima sessionId dari body juga
 const get_token = async (req, res) => {
     try {
-        // Ambil sessionId dari cookie atau dari body request
+        // Ambil sessionId dari cookie atau dari query string
         let sessionId = req.cookies.sessionId;
-        
-        // Jika tidak ada di cookie, coba ambil dari body request
-        if (!sessionId && req.body.sessionId) {
-            sessionId = req.body.sessionId;
+
+        // Jika tidak ada di cookie, coba ambil dari query (misalnya ?sessionId=...)
+        if (!sessionId && req.query.sessionId) {
+            sessionId = req.query.sessionId;
         }
         
         if (!sessionId) {
