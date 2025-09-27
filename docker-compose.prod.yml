@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile.prod
     image: express-app:latest
     container_name: express-app
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
@@ -42,21 +42,6 @@ services:
     container_name: redis-db
     ports:
       - "6379:6379"
-    networks:
-      - app-network
-
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - app
     networks:
       - app-network
 
