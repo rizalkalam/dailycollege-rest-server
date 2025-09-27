@@ -19,9 +19,9 @@ services:
       - MONGO_URI=mongodb://mongo:27017/dailycollege
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - VIRTUAL_HOST=api.example.com
-      - LETSENCRYPT_HOST=api.example.com
-      - LETSENCRYPT_EMAIL=youremail@example.com
+      - VIRTUAL_HOST=dailycollege.testingfothink.my.id
+      - LETSENCRYPT_HOST=dailycollege.testingfothink.my.id
+      - LETSENCRYPT_EMAIL=rizalkalam78@gmail.com
     command: npm start
     networks:
       - proxy-tier
