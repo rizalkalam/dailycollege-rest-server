@@ -6,8 +6,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: express-app
     ports:
-      - "27017:27017"
-      - "6379:6379"
+      - "3000:3000"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
