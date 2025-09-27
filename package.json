@@ -6,14 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "node src/server.js",
     "seed:users": "node src/seeders/userSeeder.js",
     "seed:course_schedule": "node src/seeders/courseScheduleSeeder.js",
     "seed:tasks": "node src/seeders/taskSeeder.js",
     "seed:finance": "node src/seeders/financialRecordSeeder.js",
     "seed:days": "node src/seeders/daySeeder.js",
     "seed:colors": "node src/seeders/colorSeeder.js",
-    "seed:calendar": "node src/seeders/calendarEventSeeder.js"
+    "seed:calendar": "node src/seeders/calendarEventSeeder.js",
+    "seed:all": "npm run seed:users && npm run seed:course_schedule && npm run seed:tasks && npm run seed:finance && npm run seed:days && npm run seed:colors && npm run seed:calendar"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.8.4",
+    "mysql2": "^3.15.0",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
@@ -44,8 +46,12 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "redis": "^4.7.0",
+    "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.3"
   }
 }
