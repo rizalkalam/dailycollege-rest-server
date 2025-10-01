@@ -13,9 +13,8 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
   try {
     // Setup transporter untuk Nodemailer
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465, // bisa juga 587 kalau mau STARTTLS
-      secure: true, // true kalau port 465, false kalau pakai 587
+      host: "smtp-relay.brevo.com",
+      port: 587,
       auth: {
         user: "rizalkhoiru6@gmail.com",
         pass: "gqcjyfkdyovmoyyf",
@@ -70,11 +69,9 @@ const resendVerificationCode = async (req, res) => {
     });
 
     if (!matchingKey) {
-      return res
-        .status(400)
-        .json({
-          message: "Data pengguna tidak ditemukan. Daftar akun terlebih dahulu",
-        });
+      return res.status(400).json({
+        message: "Data pengguna tidak ditemukan. Daftar akun terlebih dahulu",
+      });
     }
 
     // Ambil data pengguna dari Redis
@@ -97,19 +94,15 @@ const resendVerificationCode = async (req, res) => {
     // Kirim ulang email verifikasi
     await sendVerificationEmail(email, newVerificationCode);
 
-    return res
-      .status(200)
-      .json({
-        message:
-          "A new verification code has been sent. Please check your inbox.",
-      });
+    return res.status(200).json({
+      message:
+        "A new verification code has been sent. Please check your inbox.",
+    });
   } catch (error) {
     console.error("Error resending verification code:", error.message);
-    return res
-      .status(500)
-      .json({
-        message: "Gagal mengirim kode verifikasi. Mohon ulangi lagi nanti",
-      });
+    return res.status(500).json({
+      message: "Gagal mengirim kode verifikasi. Mohon ulangi lagi nanti",
+    });
   }
 };
 
@@ -174,12 +167,9 @@ const register = async (req, res) => {
     // Kirim email verifikasi
     await sendVerificationEmail(email, verificationCode);
 
-    return res
-      .status(200)
-      .json({
-        message:
-          "Verification code sent to your email. Please check your inbox.",
-      });
+    return res.status(200).json({
+      message: "Verification code sent to your email. Please check your inbox.",
+    });
   } catch (error) {
     console.error("Error registering user:", error.message);
     res.status(400).json({ message: error.message });
