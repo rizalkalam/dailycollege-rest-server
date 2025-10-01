@@ -14,8 +14,8 @@ const sendVerificationEmail = async (email, verificationCode, res) => {
     // Setup transporter untuk Nodemailer
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 587, // bisa juga 587 kalau mau STARTTLS
-      secure: false, // true kalau port 465, false kalau pakai 587
+      port: 465, // bisa juga 587 kalau mau STARTTLS
+      secure: true, // true kalau port 465, false kalau pakai 587
       auth: {
         user: "rizalkhoiru6@gmail.com",
         pass: "gqcjyfkdyovmoyyf",
