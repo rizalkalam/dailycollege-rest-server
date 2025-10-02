@@ -398,43 +398,32 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
  *       400:
  *         description: "Error in authentication"
  */
-router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  async (req, res) => {
     try {
-        const { user } = req;  // Ambil user dari request
+      const { user } = req;
+      const accessToken = generateToken(user._id);
 
-        const accessToken = await generateToken(user._id);
-
-        // Kirimkan token dalam respons
-        if (user.isNew) {
-            return res.status(200).json({
-                message: 'Anda berhasil mendaftar!',
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    googleId: user.googleId
-                },
-                isNewUser: true,
-                redirectTo: 'https://dailycollege.vercel.app/',
-                token: accessToken
-            });
-        } else {
-            return res.status(200).json({
-                message: 'Akun anda sudah terdaftar!',
-                isNewUser: false,
-                redirectTo: 'https://dailycollege.vercel.app/',  // URL untuk redirect
-                token: accessToken
-            });
-        }
-
+      // Redirect ke FE dengan query token
+      if (user.isNew) {
+        return res.redirect(
+          `https://dailycollege.vercel.app/?isNewUser=true&token=${accessToken}`
+        );
+      } else {
+        return res.redirect(
+          `https://dailycollege.vercel.app/?isNewUser=false&token=${accessToken}`
+        );
+      }
     } catch (err) {
-        console.error('Error during callback handling:', err);
-        return res.status(500).json({
-            message: 'Internal Server Error',
-            error: err.message || err
-        })
+      console.error("Error during callback handling:", err);
+      return res.redirect(
+        "https://dailycollege.vercel.app/login?error=InternalServerError"
+      );
     }
-});
+  }
+);
 
 
 module.exports = router;
