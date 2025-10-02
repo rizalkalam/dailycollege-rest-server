@@ -406,14 +406,15 @@ router.get(
       const { user } = req;
       const accessToken = generateToken(user._id);
 
-      // Redirect ke FE dengan query token
+      const baseUrl = "https://dailycollege.vercel.app";
+
       if (user.isNew) {
         return res.redirect(
-          `https://dailycollege.vercel.app/?isNewUser=true&token=${accessToken}`
+          `${baseUrl}/?isNewUser=true&token=${accessToken}`
         );
       } else {
         return res.redirect(
-          `https://dailycollege.vercel.app/?isNewUser=false&token=${accessToken}`
+          `${baseUrl}/?isNewUser=false&token=${accessToken}`
         );
       }
     } catch (err) {
