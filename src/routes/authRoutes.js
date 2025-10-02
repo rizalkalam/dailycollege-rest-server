@@ -402,7 +402,7 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     try {
         const { user } = req;  // Ambil user dari request
 
-        const accessToken = generateToken(user._id);
+        const accessToken = await generateToken(user._id);
 
         // Kirimkan token dalam respons
         if (user.isNew) {
