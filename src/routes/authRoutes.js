@@ -1,9 +1,16 @@
-const express = require('express');
-const { login, logout, get_token, register, verifyAndRegisterUser, resendVerificationCode} = require('../controllers/authController');
-const passport = require('passport');
+const express = require("express");
+const {
+  login,
+  logout,
+  get_token,
+  register,
+  verifyAndRegisterUser,
+  resendVerificationCode,
+} = require("../controllers/authController");
+const passport = require("passport");
 const router = express.Router();
-const { generateToken } = require('../utils/jwt')
-const authenticate = require('../middlewares/authenticate');
+const { generateToken } = require("../utils/jwt");
+const authenticate = require("../middlewares/authenticate");
 
 /**
  * @swagger
@@ -39,7 +46,7 @@ const authenticate = require('../middlewares/authenticate');
  *       500:
  *         description: Server error
  */
-router.post('/register', register);
+router.post("/register", register);
 
 /**
  * @swagger
@@ -95,7 +102,7 @@ router.post('/register', register);
  *                   type: string
  *                   example: Failed to resend verification code. Please try again later.
  */
-router.post('/resend-verification-code', resendVerificationCode);
+router.post("/resend-verification-code", resendVerificationCode);
 
 /**
  * @swagger
@@ -160,7 +167,7 @@ router.post('/resend-verification-code', resendVerificationCode);
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/verify', verifyAndRegisterUser);
+router.post("/verify", verifyAndRegisterUser);
 
 /**
  * @swagger
@@ -228,7 +235,7 @@ router.post('/verify', verifyAndRegisterUser);
  *                   type: string
  *                   example: Terjadi kesalahan pada server
  */
-router.post('/login', login);
+router.post("/login", login);
 
 /**
  * @swagger
@@ -299,7 +306,7 @@ router.post('/login', login);
  *     security:
  *       - cookieAuth: []
  */
-router.get('/get-token', get_token)
+router.get("/get-token", get_token);
 
 /**
  * @swagger
@@ -343,7 +350,7 @@ router.get('/get-token', get_token)
  *                   type: string
  *                   example: Kesalahan server saat logout
  */
-router.get('/logout', authenticate, logout)
+router.get("/logout", authenticate, logout);
 
 // Initiates the Google OAuth 2.0 authentication flow
 /**
@@ -357,7 +364,10 @@ router.get('/logout', authenticate, logout)
  *       200:
  *         description: "Redirects to Google OAuth login"
  */
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
 /**
  * @swagger
@@ -398,43 +408,45 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
  *       400:
  *         description: "Error in authentication"
  */
-router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  async (req, res) => {
     try {
-        const { user } = req;  // Ambil user dari request
+      const { user } = req; // Ambil user dari request
 
-        const accessToken = generateToken(user._id);
+      const accessToken = await generateToken(user._id);
 
-        // Kirimkan token dalam respons
-        if (user.isNew) {
-            return res.status(200).json({
-                message: 'Anda berhasil mendaftar!',
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    googleId: user.googleId
-                },
-                isNewUser: true,
-                redirectTo: 'https://dailycollege.vercel.app/',
-                token: accessToken
-            });
-        } else {
-            return res.status(200).json({
-                message: 'Akun anda sudah terdaftar!',
-                isNewUser: false,
-                redirectTo: 'https://dailycollege.vercel.app/',  // URL untuk redirect
-                token: accessToken
-            });
-        }
-
+      // Kirimkan token dalam respons
+      if (user.isNew) {
+        return res.status(200).json({
+          message: "Anda berhasil mendaftar!",
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            googleId: user.googleId,
+          },
+          isNewUser: true,
+          redirectTo: "https://dailycollege.vercel.app/",
+          token: accessToken,
+        });
+      } else {
+        return res.status(200).json({
+          message: "Akun anda sudah terdaftar!",
+          isNewUser: false,
+          redirectTo: "https://dailycollege.vercel.app/", // URL untuk redirect
+          token: accessToken,
+        });
+      }
     } catch (err) {
-        console.error('Error during callback handling:', err);
-        return res.status(500).json({
-            message: 'Internal Server Error',
-            error: err.message || err
-        })
+      console.error("Error during callback handling:", err);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        error: err.message || err,
+      });
     }
-});
-
+  }
+);
 
 module.exports = router;
